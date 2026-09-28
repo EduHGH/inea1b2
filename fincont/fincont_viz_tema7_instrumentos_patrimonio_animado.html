@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tema 7 · Valor razonable vs coste, animado</title>
+<style>
+:root{
+  --bg:#f7f5f0;--card:#fffdf8;--ink:#1d2433;--mut:#6b7385;--line:#e3ded2;
+  --cost:#2f6f9f;--gain:#3f8f6b;--loss:#c2453a;--div:#c8862a;--gas:#7a4fa3;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#14171f;--card:#1c202b;--ink:#eceff6;--mut:#98a1b5;--line:#2c3242;
+  --cost:#5fa8dc;--gain:#5cc496;--loss:#e2695d;--div:#e0a04a;--gas:#a98bd0;}
+}
+:root[data-theme="dark"]{--bg:#14171f;--card:#1c202b;--ink:#eceff6;--mut:#98a1b5;--line:#2c3242;
+  --cost:#5fa8dc;--gain:#5cc496;--loss:#e2695d;--div:#e0a04a;--gas:#a98bd0;}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:28px 20px 8px;max-width:980px;margin:0 auto}
+header small{color:var(--mut);letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+h1{margin:6px 0 6px;font-size:clamp(24px,5vw,38px);line-height:1.15}
+header p{color:var(--mut);margin:0;max-width:62ch}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:6px;overflow-x:auto;padding:10px 20px}
+nav button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer;font:inherit;font-size:14px}
+nav button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+main{max-width:980px;margin:0 auto;padding:18px 20px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:18px}
+.card h2{margin:0 0 4px;font-size:20px}
+.card .sub{color:var(--mut);margin:0 0 14px;font-size:14px}
+.stage{width:100%;overflow-x:auto}
+svg{display:block;width:100%;height:auto;max-width:100%}
+.ctrls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 18px;margin:14px 0}
+.ctrls label{font-size:13px;color:var(--mut);display:block}
+.ctrls output{color:var(--ink);font-weight:600;float:right}
+input[type=range]{width:100%;accent-color:var(--cost)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:10px;cursor:pointer;font:inherit;font-size:14px}
+.btn.primary{background:var(--cost);border-color:var(--cost);color:#fff}
+.btn.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--line);transition:.3s}
+.dot.on{background:var(--cost);transform:scale(1.4)}
+.say{min-height:3.2em;margin:10px 0 0;padding:10px 12px;border-left:4px solid var(--cost);background:color-mix(in srgb,var(--cost) 8%,transparent);border-radius:0 10px 10px 0;font-size:15px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--mut);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
+.ok{color:var(--gain);font-weight:600}.bad{color:var(--loss);font-weight:600}
+.num{font-variant-numeric:tabular-nums}
+.panel{display:none}.panel.on{display:block}
+text{font-family:inherit}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}
+.tbl td,.tbl th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.tbl td:last-child,.tbl th:last-child{text-align:right}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <small>Tema 7 · Activos y pasivos financieros</small>
+  <h1>Cuando el mercado pone el precio y cuando no</h1>
+  <p>Dos paquetes de acciones, dos criterios. Si hay mercado activo se valora a valor razonable y los cambios van a resultados; si no, se mantiene el coste y solo se corrige por deterioro.</p>
+</header>
+<nav id="nav"></nav>
+
+<main>
+<!-- ============ PRINCIPAL ============ -->
+<section class="panel on" id="p0">
+  <div class="card">
+    <h2>Ejemplo guiado: Cartera Serrano, S.L.</h2>
+    <p class="sub">Dos carteras en paralelo y, debajo, la cuenta de resultados financieros. Pulsa «Reproducir».</p>
+    <div class="stage"><svg id="mainSvg" viewBox="0 0 760 430" role="img" aria-label="Valor contable de Pelayo y Alcalá y resultado financiero del ejercicio"></svg></div>
+    <div class="steps" id="dotsMain"></div>
+    <div class="say" id="sayMain"></div>
+    <div class="row">
+      <button class="btn primary" id="playMain">▶ Reproducir</button>
+      <button class="btn" id="prevMain">← Paso</button>
+      <button class="btn" id="nextMain">Paso →</button>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--cost)"></i>Coste</span>
+      <span><i style="background:var(--gain)"></i>Plusvalía / reversión</span>
+      <span><i style="background:var(--loss)"></i>Deterioro</span>
+      <span><i style="background:var(--div)"></i>Dividendo</span>
+      <span><i style="background:var(--gas)"></i>Gastos de compra</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>La bifurcación: ¿hay mercado activo?</h2>
+    <p class="sub">Todo depende de una pregunta. Elige qué camino quieres ver: la única fila igual en los dos es el dividendo.</p>
+    <div class="row" style="margin:0 0 8px">
+      <button class="btn on" id="fkBoth">Ver las dos</button>
+      <button class="btn" id="fkVr">Solo Pelayo (cotiza)</button>
+      <button class="btn" id="fkCo">Solo Alcalá (no cotiza)</button>
+    </div>
+    <div class="stage"><svg id="forkSvg" viewBox="0 0 760 372" role="img" aria-label="Comparación entre valor razonable y coste"></svg></div>
+  </div>
+
+  <div class="card">
+    <h2>Simulador 1 · La cartera cotizada</h2>
+    <p class="sub">Cambia acciones, precio de compra y cotización de cierre. La diferencia va a resultados, suba o baje.</p>
+    <div class="ctrls">
+      <div><label>Número de acciones <output id="oN"></output></label><input type="range" id="sN" min="100" max="3000" step="100" value="1000"></div>
+      <div><label>Precio de compra (€/acción) <output id="oPc"></output></label><input type="range" id="sPc" min="1" max="30" step="0.25" value="12.5"></div>
+      <div><label>Cotización de cierre (€/acción) <output id="oCz"></output></label><input type="range" id="sCz" min="1" max="30" step="0.25" value="13.8"></div>
+    </div>
+    <div class="stage"><svg id="vrSvg" viewBox="0 0 760 230" role="img" aria-label="Coste frente a valor razonable"></svg></div>
+    <table class="tbl num" id="vrTbl"></table>
+  </div>
+
+  <div class="card">
+    <h2>Simulador 2 · Deterioro y reversión (no cotizada)</h2>
+    <p class="sub">El valor contable nunca supera el coste. Si el patrimonio neto atribuible cae, se deteriora; si se recupera, se revierte hasta el techo del coste.</p>
+    <div class="ctrls">
+      <div><label>Coste (con gastos activados) <output id="oCo"></output></label><input type="range" id="sCo" min="5000" max="40000" step="50" value="20150"></div>
+      <div><label>PN atribuible, año 1 <output id="oP1"></output></label><input type="range" id="sP1" min="0" max="40000" step="50" value="16500"></div>
+      <div><label>PN atribuible, año 2 <output id="oP2"></output></label><input type="range" id="sP2" min="0" max="40000" step="50" value="19000"></div>
+    </div>
+    <div class="stage"><svg id="detSvg" viewBox="0 0 760 320" role="img" aria-label="Deterioro y reversión por año"></svg></div>
+    <div class="say" id="detSay"></div>
+  </div>
+
+  <div class="card">
+    <h2>La venta: contra el último valor contable</h2>
+    <p class="sub">Cada euro de variación solo se cuenta una vez. Cambia el precio de venta y alterna entre el cálculo correcto y el erróneo.</p>
+    <div class="ctrls">
+      <div><label>Venta de Pelayo (€/acción) <output id="oVp"></output></label><input type="range" id="sVp" min="8" max="20" step="0.25" value="14.5"></div>
+      <div><label>Venta de Alcalá (total) <output id="oVa"></output></label><input type="range" id="sVa" min="8000" max="25000" step="250" value="17500"></div>
+    </div>
+    <div class="row" style="margin:0 0 6px">
+      <button class="btn on" id="vOk">✓ Contra último valor contable</button>
+      <button class="btn" id="vMal">✗ Contra coste histórico</button>
+    </div>
+    <div class="stage"><svg id="ventaSvg" viewBox="0 0 760 380" role="img" aria-label="Resultado de la venta frente al valor contable o el coste"></svg></div>
+    <div class="legend">
+      <span><i style="background:var(--cost)"></i>Coste original</span>
+      <span><i style="background:var(--gain)"></i>Último valor contable</span>
+      <span><i style="background:var(--gas)"></i>Precio de venta</span>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="p1"></section>
+<section class="panel" id="p2"></section>
+<section class="panel" id="p3"></section>
+<section class="panel" id="p4"></section>
+</main>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const grp=s=>s.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+const fmt=n=>{const r=Math.round(Math.abs(n));return (n<0&&r!==0?'−':'')+grp(String(r))+' €'};
+const fmt2=n=>{const a=Math.abs(n).toFixed(2).split('.');return (n<0&&Math.abs(n)>=0.005?'−':'')+grp(a[0])+','+a[1]+' €'};
+const sg=n=>(n>0?'+':'')+fmt(n);
+const sg2=n=>(n>0?'+':'')+fmt2(n);
+const money=v=>Number.isInteger(v)?fmt(v):fmt2(v);
+const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const el=(t,a={},p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const reduced=()=>matchMedia('(prefers-reduced-motion:reduce)').matches;
+function tween(a,b,ms,cb,done){if(reduced()){cb(b);done&&done();return}
+  const t0=performance.now();(function f(n){const p=Math.min(1,(n-t0)/ms);cb(a+(b-a)*ease(p));p<1?requestAnimationFrame(f):done&&done()})(t0)}
+const colors=()=>({cost:cssv('--cost'),gain:cssv('--gain'),loss:cssv('--loss'),div:cssv('--div'),gas:cssv('--gas'),ink:cssv('--ink'),mut:cssv('--mut'),line:cssv('--line')});
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+/* nav */
+['Principal','Nivel 1','Nivel 2','Nivel 3','Nivel 4'].forEach((t,i)=>{
+  const b=document.createElement('button');b.textContent=t;b.className=i?'':'on';
+  b.onclick=()=>{document.querySelectorAll('nav button').forEach((x,j)=>x.classList.toggle('on',j===i));
+    document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('on',j===i));window.scrollTo({top:0,behavior:'smooth'})};
+  $('nav').appendChild(b)});
+
+/* ---------- ESCENA PRINCIPAL ---------- */
+const mainTxt=[
+ 'Serrano compra 1.000 acciones de Pelayo (cotiza en bolsa) y 500 participaciones de Alcalá (no cotiza). ¿Se valoran igual al cierre?',
+ 'No. Pelayo tiene un precio de mercado fiable → valor razonable con cambios en resultados. Alcalá no → coste, corregido solo por deterioro.',
+ 'Compra de Pelayo: 1.000 × 12,50 = 12.500 € a (540). Los 200 € de gastos NO se activan: van a (669) gasto financiero. Bancos: 12.700 €.',
+ 'Compra de Alcalá: 500 × 40 = 20.000 € más 150 € de gastos que SÍ se activan: (250) por 20.150 €.',
+ 'Dividendo de Pelayo: 1.000 × 0,30 = 300 € a (760). Es ingreso del ejercicio y no cambia el valor contable de la acción.',
+ 'Cierre de Pelayo: cotización 13,80 → valor razonable 13.800 €. Plusvalía = 13.800 − 12.500 = +1.300 € a resultados (763).',
+ 'Cierre de Alcalá: el patrimonio neto atribuible baja a 16.500 € frente a un coste de 20.150 €. Deterioro = 3.650 € a (696)/(293).',
+ 'Resultado financiero: −200 (gastos) + 300 (dividendo) + 1.300 (plusvalía) − 3.650 (deterioro) = −2.250 €. En balance: Pelayo 13.800 €, Alcalá 16.500 €.'
+];
+$('dotsMain').innerHTML=mainTxt.map(()=>'<span class="dot"></span>').join('');
+function drawMain(n,p){
+  const svg=$('mainSvg');svg.innerHTML='';const c=colors();
+  const vis=s=>n>s?1:(n===s?p:0);
+  const X=v=>180+v*0.0229;
+  const banners=['Dos paquetes de acciones: ¿existe un precio de mercado fiable?','Pelayo cotiza → valor razonable · Alcalá no → coste',
+   '(540) 12.500 + (669) 200 / (572) 12.700','(250) 20.150 / (572) 20.150  (500 × 40 + 150 de gastos)',
+   '(572) 300 / (760) 300 · el dividendo no toca el valor contable','Pelayo: 1.000 × 13,80 = 13.800 · plusvalía +1.300 a resultados',
+   'Alcalá: 20.150 − 16.500 = 3.650 de deterioro · (696)/(293)','−200 + 300 + 1.300 − 3.650 = −2.250 € de resultado financiero'];
+  const bcol=[c.mut,c.cost,c.gas,c.cost,c.div,c.gain,c.loss,c.loss];
+  el('rect',{x:20,y:12,width:720,height:38,rx:10,fill:'none',stroke:bcol[n],'stroke-width':1.5},svg);
+  el('text',{x:380,y:36,'text-anchor':'middle',fill:bcol[n],'font-size':14,'font-weight':700},svg).textContent=banners[n];
+  // carriles
+  const lane=(y,title,badge,badgeCol)=>{
+    el('text',{x:20,y:y-10,fill:c.ink,'font-size':13,'font-weight':700},svg).textContent=title;
+    if(badge)el('text',{x:662,y:y-10,'text-anchor':'end',fill:badgeCol,'font-size':12,'font-weight':700},svg).textContent=badge;
+    el('rect',{x:180,y,width:482,height:44,rx:8,fill:'none',stroke:c.line,'stroke-width':2},svg)};
+  lane(100,'Pelayo · cotiza en bolsa',n>=1?'→ VALOR RAZONABLE':'',c.gain);
+  lane(210,'Alcalá · no cotiza',n>=1?'→ COSTE + DETERIORO':'',c.cost);
+  // Pelayo
+  const cP=12500*vis(2),gP=1300*vis(5);
+  if(cP>0)el('rect',{x:180,y:100,width:X(cP)-180,height:44,rx:8,fill:c.cost},svg);
+  if(gP>0)el('rect',{x:X(cP),y:100,width:X(cP+gP)-X(cP),height:44,fill:c.gain},svg);
+  if(cP>0)el('text',{x:X(cP+gP)+8,y:127,fill:c.ink,'font-size':12.5,'font-weight':700},svg).textContent=fmt(cP+gP);
+  // Alcalá
+  const tot=20150*vis(3),det=3650*vis(6),vc=tot-det;
+  if(tot>0){
+    el('rect',{x:180,y:210,width:X(Math.min(vc,20000))-180,height:44,rx:8,fill:c.cost},svg);
+    if(vc>20000)el('rect',{x:X(20000),y:210,width:X(vc)-X(20000),height:44,fill:c.cost,opacity:.6},svg);
+    if(det>0)el('rect',{x:X(vc),y:210,width:X(20150)-X(vc),height:44,fill:c.loss,opacity:.28,stroke:c.loss,'stroke-dasharray':'4 3'},svg);
+    el('text',{x:X(20150)+8,y:237,fill:c.ink,'font-size':12.5,'font-weight':700},svg).textContent=fmt(vc);
+  }
+  // franja P&G
+  const k=0.095,zx=380,sy=314,sh=30;
+  el('text',{x:20,y:sy-10,fill:c.mut,'font-size':12},svg).textContent='Cuenta de resultados financieros del ejercicio';
+  el('rect',{x:20,y:sy,width:720,height:sh,rx:8,fill:'none',stroke:c.line},svg);
+  el('line',{x1:zx,x2:zx,y1:sy-6,y2:sy+sh+6,stroke:c.mut,'stroke-width':2},svg);
+  const draw=(side,items)=>{let cx=zx;items.forEach(it=>{
+    const f=vis(it.s);if(f<=0)return;const len=it.v*k*f,wide=it.v*k>=70;
+    const x=side<0?cx-len:cx;
+    el('rect',{x,y:sy,width:len,height:sh,fill:it.col,opacity:.95},svg);
+    if(wide&&f>.85)el('text',{x:x+len/2,y:sy+sh/2+4,'text-anchor':'middle',fill:'#fff','font-size':12,'font-weight':700},svg).textContent=it.lab;
+    else if(!wide)el('text',{x:side<0?zx-4:zx+4,y:sy+sh+22,'text-anchor':side<0?'end':'start',fill:it.col,'font-size':12,'font-weight':700},svg).textContent=it.lab;
+    cx+=side<0?-len:len})};
+  draw(-1,[{v:200,s:2,col:c.gas,lab:'−200 gastos (669)'},{v:3650,s:6,col:c.loss,lab:'−3.650 deterioro'}]);
+  draw(1,[{v:300,s:4,col:c.div,lab:'+300 dividendo (760)'},{v:1300,s:5,col:c.gain,lab:'+1.300 plusvalía'}]);
+  if(n===7){
+    el('text',{x:380,y:398,'text-anchor':'middle',fill:c.loss,'font-size':16,'font-weight':700},svg).textContent='Resultado financiero del ejercicio = −2.250 €';
+    el('text',{x:380,y:418,'text-anchor':'middle',fill:c.mut,'font-size':12.5},svg).textContent='Balance final: Pelayo 13.800 € (valor razonable) · Alcalá 16.500 € (coste − deterioro)'}
+}
+let ms=0,mt=null;
+function renderMain(n,instant){
+  ms=n;document.querySelectorAll('#dotsMain .dot').forEach((x,i)=>x.classList.toggle('on',i===n));
+  $('sayMain').textContent=mainTxt[n];
+  if(instant||n===0||n===1||n===7){drawMain(n,1);return}
+  tween(0,1,1000,p=>drawMain(n,p));
+}
+function stopM(){clearInterval(mt);mt=null;$('playMain').textContent='▶ Reproducir'}
+$('playMain').onclick=()=>{if(mt){stopM();return}if(ms>=mainTxt.length-1)ms=-1;$('playMain').textContent='⏸ Pausa';
+  const go=()=>{if(ms>=mainTxt.length-1){stopM();return}renderMain(ms+1)};go();mt=setInterval(go,2900)};
+$('nextMain').onclick=()=>{stopM();renderMain(Math.min(mainTxt.length-1,ms+1))};
+$('prevMain').onclick=()=>{stopM();renderMain(Math.max(0,ms-1),true)};
+
+/* ---------- BIFURCACIÓN ---------- */
+let forkMode='both';
+function drawFork(t){
+  const svg=$('forkSvg');svg.innerHTML='';const c=colors();
+  const A=forkMode==='co'?.22:1,B=forkMode==='vr'?.22:1;
+  el('rect',{x:170,y:8,width:420,height:38,rx:12,fill:'none',stroke:c.ink,'stroke-width':1.5},svg);
+  el('text',{x:380,y:32,'text-anchor':'middle',fill:c.ink,'font-size':14,'font-weight':700},svg).textContent='¿Cotiza en un mercado activo con precio fiable?';
+  el('path',{d:'M 300 46 L 210 66',stroke:c.mut,'stroke-width':2,fill:'none'},svg);
+  el('path',{d:'M 460 46 L 550 66',stroke:c.mut,'stroke-width':2,fill:'none'},svg);
+  el('rect',{x:50,y:66,width:320,height:34,rx:17,fill:c.gain,opacity:A},svg);
+  el('text',{x:210,y:88,'text-anchor':'middle',fill:'#fff','font-size':13.5,'font-weight':700,opacity:A},svg).textContent='SÍ · Pelayo (cotizada)';
+  el('rect',{x:390,y:66,width:320,height:34,rx:17,fill:c.cost,opacity:B},svg);
+  el('text',{x:550,y:88,'text-anchor':'middle',fill:'#fff','font-size':13.5,'font-weight':700,opacity:B},svg).textContent='NO · Alcalá (no cotizada)';
+  const rows=[
+   {h:'Valoración',a:'Valor razonable de mercado',b:'Coste menos deterioro'},
+   {h:'Gastos de compra',a:'A gasto financiero (669)',b:'Se activan en la inversión'},
+   {h:'Variación de valor',a:'Cada cierre, a resultados',b:'Solo si hay deterioro (696/293)'},
+   {h:'Dividendo',a:'Ingreso (760)',b:'Ingreso (760)',same:true}];
+  rows.forEach((r,i)=>{
+    const f=clamp(t*5-i,0,1),y=118+i*60;
+    el('text',{x:380,y:y+4,'text-anchor':'middle',fill:c.mut,'font-size':12,'font-weight':600,opacity:f},svg).textContent=r.h.toUpperCase();
+    const cell=(x,txt,col,al)=>{
+      el('rect',{x,y:y+10,width:320,height:36,rx:10,fill:col,opacity:.16*f*al},svg);
+      el('rect',{x,y:y+10,width:320,height:36,rx:10,fill:'none',stroke:col,'stroke-width':1.5,opacity:f*al},svg);
+      el('text',{x:x+160,y:y+33,'text-anchor':'middle',fill:c.ink,'font-size':13.5,'font-weight':600,opacity:f*al},svg).textContent=txt};
+    cell(50,r.a,r.same?c.div:c.gain,A);cell(390,r.b,r.same?c.div:c.cost,B);
+    if(r.same&&f>.5)el('text',{x:380,y:y+33,'text-anchor':'middle',fill:c.div,'font-size':20,'font-weight':700,opacity:f},svg).textContent='=';
+  });
+}
+function setFork(m){forkMode=m;['Both','Vr','Co'].forEach(k=>$('fk'+k).classList.toggle('on',(k==='Both'&&m==='both')||(k==='Vr'&&m==='vr')||(k==='Co'&&m==='co')));
+  tween(0,1,1100,drawFork)}
+$('fkBoth').onclick=()=>setFork('both');$('fkVr').onclick=()=>setFork('vr');$('fkCo').onclick=()=>setFork('co');
+
+/* ---------- SIMULADOR 1: valor razonable ---------- */
+const V1={n:1000,pc:12.5,cz:13.8};
+let vrCur={co:12500,vr:13800};
+function drawVr(cur){
+  const svg=$('vrSvg');svg.innerHTML='';const c=colors();
+  const x0=40,w=680,maxV=Math.max(cur.co,cur.vr,1)*1.12,sc=v=>v/maxV*w;
+  el('text',{x:x0,y:38,fill:c.mut,'font-size':13},svg).textContent='Coste de compra (no cambia nunca)';
+  el('rect',{x:x0,y:46,width:sc(cur.co),height:44,rx:10,fill:c.cost},svg);
+  el('text',{x:x0+14,y:74,fill:'#fff','font-size':14,'font-weight':700},svg).textContent=fmt(cur.co);
+  el('text',{x:x0,y:126,fill:c.mut,'font-size':13},svg).textContent='Valor razonable de cierre';
+  if(cur.vr>=cur.co){
+    el('rect',{x:x0,y:134,width:sc(cur.co),height:44,rx:10,fill:c.cost},svg);
+    el('rect',{x:x0+sc(cur.co),y:134,width:sc(cur.vr-cur.co),height:44,fill:c.gain},svg);
+  }else{
+    el('rect',{x:x0,y:134,width:sc(cur.vr),height:44,rx:10,fill:c.cost},svg);
+    el('rect',{x:x0+sc(cur.vr),y:134,width:sc(cur.co-cur.vr),height:44,fill:c.loss,opacity:.28,stroke:c.loss,'stroke-dasharray':'4 3'},svg);
+  }
+  el('text',{x:x0+14,y:162,fill:'#fff','font-size':14,'font-weight':700},svg).textContent=fmt(cur.vr);
+  const d=cur.vr-cur.co;
+  el('text',{x:380,y:212,'text-anchor':'middle',fill:d>=0?c.gain:c.loss,'font-size':15,'font-weight':700},svg).textContent='Variación de valor razonable (a resultados): '+sg(d);
+}
+function updateVr(anim=true){
+  const co=V1.n*V1.pc,vr=V1.n*V1.cz;
+  $('oN').textContent=V1.n.toLocaleString('es-ES').replace(/\./g,'.');$('oPc').textContent=fmt2(V1.pc);$('oCz').textContent=fmt2(V1.cz);
+  const from={...vrCur},to={co,vr};
+  const t0=performance.now();
+  const step=nn=>{const p=reduced()||!anim?1:Math.min(1,(nn-t0)/450),e=ease(p);
+    vrCur={co:from.co+(to.co-from.co)*e,vr:from.vr+(to.vr-from.vr)*e};drawVr(vrCur);if(p<1)requestAnimationFrame(step)};
+  requestAnimationFrame(step);
+  const d=vr-co;
+  $('vrTbl').innerHTML=`<tr><th>Concepto</th><th>Importe</th></tr>
+   <tr><td>Coste de compra (${grp(String(V1.n))} × ${fmt2(V1.pc)})</td><td>${fmt2(co)}</td></tr>
+   <tr><td>Valor razonable de cierre (${grp(String(V1.n))} × ${fmt2(V1.cz)})</td><td>${fmt2(vr)}</td></tr>
+   <tr><th>Variación a resultados</th><th class="${d>=0?'ok':'bad'}">${sg2(d)}</th></tr>`;
+}
+[['sN','n'],['sPc','pc'],['sCz','cz']].forEach(([id,k])=>$(id).addEventListener('input',e=>{V1[k]=+e.target.value;updateVr()}));
+
+/* ---------- SIMULADOR 2: deterioro y reversión ---------- */
+const V2={co:20150,p1:16500,p2:19000};
+function drawDet(){
+  const svg=$('detSvg');svg.innerHTML='';const c=colors();
+  const vc1=clamp(V2.p1,0,V2.co),vc2=clamp(V2.p2,0,V2.co);
+  const base=250,top=40,hMax=base-top,maxV=Math.max(V2.co,V2.p1,V2.p2)*1.08,sc=v=>v/maxV*hMax;
+  el('line',{x1:30,x2:730,y1:base,y2:base,stroke:c.line,'stroke-width':2},svg);
+  const bw=140,xs=[90,310,530];
+  // techo
+  el('line',{x1:40,x2:720,y1:base-sc(V2.co),y2:base-sc(V2.co),stroke:c.cost,'stroke-dasharray':'6 5','stroke-width':2},svg);
+  el('text',{x:722,y:base-sc(V2.co)-6,'text-anchor':'end',fill:c.cost,'font-size':12,'font-weight':700},svg).textContent='Techo = coste original '+fmt(V2.co);
+  const bar=(x,vc,lab,pn)=>{
+    el('rect',{x,y:base-sc(V2.co),width:bw,height:sc(V2.co-vc),rx:6,fill:c.loss,opacity:.22,stroke:c.loss,'stroke-dasharray':'4 3'},svg);
+    el('rect',{x,y:base-sc(vc),width:bw,height:sc(vc),rx:8,fill:c.cost},svg);
+    el('text',{x:x+bw/2,y:base+20,'text-anchor':'middle',fill:c.ink,'font-size':12.5,'font-weight':600},svg).textContent=lab;
+    if(sc(vc)>24)el('text',{x:x+bw/2,y:base-sc(vc)+21,'text-anchor':'middle',fill:'#fff','font-size':13,'font-weight':700},svg).textContent=fmt(vc);
+    if(pn!==null){const yy=base-sc(pn);
+      el('line',{x1:x-8,x2:x+bw+8,y1:yy,y2:yy,stroke:c.gas,'stroke-width':3},svg);
+      el('text',{x:x+bw+12,y:yy+4,fill:c.gas,'font-size':11.5,'font-weight':700},svg).textContent='PN '+fmt(pn)}};
+  bar(xs[0],V2.co,'Coste (año 0)',null);
+  bar(xs[1],vc1,'Valor contable año 1',V2.p1);
+  bar(xs[2],vc2,'Valor contable año 2',V2.p2);
+  const dl=vc2-vc1;
+  if(dl>0)el('rect',{x:xs[2],y:base-sc(vc2),width:bw,height:sc(dl),fill:c.gain},svg);
+  if(dl<0)el('rect',{x:xs[2],y:base-sc(vc1),width:bw,height:sc(-dl),fill:c.loss,opacity:.85},svg);
+  const det1=V2.co-vc1;
+  let s=det1>0?`<b>Año 1:</b> deterioro = ${fmt(V2.co)} − ${fmt(vc1)} = <b>${fmt(det1)}</b> a (696)/(293).`:'<b>Año 1:</b> el PN atribuible cubre el coste: no hay deterioro.';
+  if(dl>0)s+=` <b>Año 2:</b> el PN sube y se revierte <b>${fmt(dl)}</b> (mín entre lo que sube el PN y el margen hasta el coste) a (293)/(796). Nuevo valor contable: ${fmt(vc2)}.`;
+  else if(dl<0)s+=` <b>Año 2:</b> el PN vuelve a bajar y se dota un deterioro adicional de <b>${fmt(-dl)}</b>. Valor contable: ${fmt(vc2)}.`;
+  else s+=' <b>Año 2:</b> sin cambios en el valor contable.';
+  if(V2.p2>V2.co)s+=' El PN supera el coste, pero el valor contable no puede pasar del techo.';
+  $('detSay').innerHTML=s;
+}
+function updateDet(){$('oCo').textContent=fmt(V2.co);$('oP1').textContent=fmt(V2.p1);$('oP2').textContent=fmt(V2.p2);drawDet()}
+[['sCo','co'],['sP1','p1'],['sP2','p2']].forEach(([id,k])=>$(id).addEventListener('input',e=>{V2[k]=+e.target.value;updateDet()}));
+
+/* ---------- VENTA ---------- */
+const V3={p:14.5,a:17500,mode:'ok'};let vCur={p:14.5,a:17500};
+function drawVenta(cur){
+  const svg=$('ventaSvg');svg.innerHTML='';const c=colors();
+  const rowsD=[
+    {y:110,t:'Pelayo (valor razonable)',co:12500,vc:13800,venta:1000*cur.p},
+    {y:250,t:'Alcalá (coste − deterioro)',co:20150,vc:16500,venta:cur.a}];
+  const good=V3.mode==='ok';
+  rowsD.forEach(r=>{
+    const vals=[r.co,r.vc,r.venta],lo0=Math.min(...vals),hi0=Math.max(...vals),span=Math.max(hi0-lo0,1000);
+    const lo=lo0-span*.12,hi=hi0+span*.12,X=v=>60+(v-lo)/(hi-lo)*640;
+    el('text',{x:40,y:r.y-54,fill:c.ink,'font-size':13.5,'font-weight':700},svg).textContent=r.t;
+    el('line',{x1:40,x2:720,y1:r.y,y2:r.y,stroke:c.line,'stroke-width':3},svg);
+    const mk=(v,col,lab,dy,anch)=>{el('line',{x1:X(v),x2:X(v),y1:r.y-12,y2:r.y+12,stroke:col,'stroke-width':4},svg);
+      el('text',{x:X(v),y:r.y+dy,'text-anchor':anch||'middle',fill:col,'font-size':11.5,'font-weight':700},svg).textContent=lab};
+    const vcCol=r.vc>=r.co?c.gain:c.loss;
+    mk(r.co,c.cost,'Coste '+fmt(r.co),-32);
+    mk(r.venta,c.gas,'Venta '+fmt(r.venta),-16);
+    mk(r.vc,vcCol,'Valor contable '+fmt(r.vc),34);
+    const ref=good?r.vc:r.co,res=r.venta-ref,dup=r.vc-r.co;
+    const a=Math.min(X(ref),X(r.venta)),b=Math.max(X(ref),X(r.venta));
+    el('rect',{x:a,y:r.y+14,width:Math.max(2,b-a),height:8,rx:3,fill:res>=0?c.gain:c.loss},svg);
+    const label=`Resultado = ${fmt(r.venta)} − ${fmt(ref)} = ${sg(res)}`;
+    el('text',{x:40,y:r.y+62,fill:res>=0?c.gain:c.loss,'font-size':14,'font-weight':700},svg).textContent=label;
+    if(good){
+      el('text',{x:40,y:r.y+82,fill:c.mut,'font-size':12},svg).textContent=`Ajuste ya reconocido ${sg(dup)} + resultado ${sg(res)} = ${sg(r.venta-r.co)} = venta − coste original ✓`;
+    }else{
+      el('text',{x:40,y:r.y+82,fill:c.loss,'font-size':12,'font-weight':600},svg).textContent=`✗ Vuelve a contar ${sg(dup)} que ya pasó por resultados en el cierre anterior`;
+    }
+  });
+}
+function updateVenta(anim=true){
+  $('oVp').textContent=fmt2(V3.p);$('oVa').textContent=fmt(V3.a);
+  const from={...vCur},to={p:V3.p,a:V3.a};const t0=performance.now();
+  const step=nn=>{const q=reduced()||!anim?1:Math.min(1,(nn-t0)/400),e=ease(q);
+    vCur={p:from.p+(to.p-from.p)*e,a:from.a+(to.a-from.a)*e};drawVenta(vCur);if(q<1)requestAnimationFrame(step)};
+  requestAnimationFrame(step);
+}
+$('sVp').addEventListener('input',e=>{V3.p=+e.target.value;updateVenta()});
+$('sVa').addEventListener('input',e=>{V3.a=+e.target.value;updateVenta()});
+$('vOk').onclick=()=>{V3.mode='ok';$('vOk').classList.add('on');$('vMal').classList.remove('on');updateVenta(false)};
+$('vMal').onclick=()=>{V3.mode='mal';$('vMal').classList.add('on');$('vOk').classList.remove('on');updateVenta(false)};
+
+/* ---------- EJERCICIOS ---------- */
+function drawBars(svg,spec,n,p){
+  svg.innerHTML='';const c=colors();
+  const base=330,top=90,hMax=base-top,sc=v=>v/spec.max*hMax;
+  const bc=c[spec.bcol[n]]||c.cost;
+  el('rect',{x:20,y:12,width:720,height:38,rx:10,fill:'none',stroke:bc,'stroke-width':1.5},svg);
+  el('text',{x:380,y:36,'text-anchor':'middle',fill:bc,'font-size':13.5,'font-weight':700},svg).textContent=spec.banners[n];
+  el('line',{x1:20,x2:740,y1:base,y2:base,stroke:c.line,'stroke-width':2},svg);
+  (spec.lines||[]).forEach(l=>{const f=n>l.st?1:(n===l.st?p:0);if(f<=0)return;
+    el('line',{x1:20,x2:740,y1:base-sc(l.v),y2:base-sc(l.v),stroke:c.cost,'stroke-dasharray':'6 5','stroke-width':2,opacity:f},svg);
+    el('text',{x:740,y:base-sc(l.v)-6,'text-anchor':'end',fill:c.cost,'font-size':12,'font-weight':700,opacity:f},svg).textContent=l.l});
+  const cnt=spec.bars.length,slot=720/cnt,bw=Math.min(110,slot*.7);
+  spec.bars.forEach((b,i)=>{
+    const f=n>b.st?1:(n===b.st?p:0);
+    const x=20+i*slot+(slot-bw)/2;
+    if(f<=0)return;
+    const h=sc(b.v*f);
+    el('rect',{x,y:base-h,width:bw,height:h,rx:8,fill:c[b.k],opacity:(b.a||1)*.95},svg);
+    const lab=b.txt||money(b.v*f>=b.v-0.005?b.v:b.v*f);
+    if(h>26)el('text',{x:x+bw/2,y:base-h+21,'text-anchor':'middle',fill:'#fff','font-size':12.5,'font-weight':700},svg).textContent=lab;
+    else el('text',{x:x+bw/2,y:base-h-6,'text-anchor':'middle',fill:c.ink,'font-size':12.5,'font-weight':700},svg).textContent=lab;
+    el('text',{x:x+bw/2,y:base+20,'text-anchor':'middle',fill:c.ink,'font-size':12.5,'font-weight':600,opacity:Math.min(1,f*2)},svg).textContent=b.l;
+    el('text',{x:x+bw/2,y:base+36,'text-anchor':'middle',fill:c.mut,'font-size':11.5,opacity:Math.min(1,f*2)},svg).textContent=b.s;
+  });
+  if(spec.notes&&spec.notes[n])el('text',{x:380,y:404,'text-anchor':'middle',fill:c.mut,'font-size':12.5},svg).textContent=spec.notes[n];
+}
+const EJ=[
+ {id:'p1',t:'Nivel 1 · Compra y venta en el mismo ejercicio',enun:'200 acciones cotizadas compradas a 8,00 € y vendidas a 9,20 € sin ningún cierre contable entre medias.',
+  lectura:'Sin cierre intermedio no hay ajuste de valor razonable que considerar: el resultado es precio de venta menos precio de compra.',
+  txt:['200 acciones cotizadas: se compran a 8,00 € y se venden a 9,20 € dentro del mismo ejercicio.','Coste de compra: 200 × 8,00 = 1.600 €.','Importe de venta: 200 × 9,20 = 1.840 €.','Resultado = 1.840 − 1.600 = +240 €, a beneficios de cartera de negociación.'],
+  spec:{max:2000,bcol:['mut','cost','gas','gain'],
+   banners:['200 acciones · compra a 8,00 € · venta a 9,20 €','Coste: 200 × 8,00 = 1.600 €','Venta: 200 × 9,20 = 1.840 €','Resultado = 1.840 − 1.600 = +240 €'],
+   bars:[{l:'Compra',s:'200 × 8,00',v:1600,k:'cost',st:1},{l:'Venta',s:'200 × 9,20',v:1840,k:'gas',st:2},{l:'Resultado',s:'venta − compra',v:240,k:'gain',st:3,txt:'+240 €'}],
+   notes:['','','','Sin cierre intermedio: no hay ajuste previo que restar.']}},
+ {id:'p2',t:'Nivel 2 · No cotizadas con deterioro claro',enun:'300 participaciones no cotizadas a 25,00 € (sin gastos). Al cierre, el patrimonio neto atribuible es 5.400 €.',
+  lectura:'Sin valor de mercado, el patrimonio neto de la participada es la señal: si cae por debajo del coste, la inversión vale menos de lo que costó.',
+  txt:['300 participaciones no cotizadas a 25,00 €: no hay valor razonable fiable, se valoran a coste.','Coste: 300 × 25,00 = 7.500 €.','Patrimonio neto atribuible a la participación al cierre: 5.400 €.','Deterioro = 7.500 − 5.400 = 2.100 € a (696) con abono a (293).'],
+  spec:{max:8000,bcol:['mut','cost','gas','loss'],
+   banners:['No cotizan → coste con deterioro','Coste: 300 × 25,00 = 7.500 €','Valor teórico según PN atribuible: 5.400 €','Deterioro = 7.500 − 5.400 = 2.100 € · (696)/(293)'],
+   bars:[{l:'Coste',s:'300 × 25,00',v:7500,k:'cost',st:1},{l:'PN atribuible',s:'valor teórico',v:5400,k:'gas',st:2},{l:'Deterioro',s:'(696)/(293)',v:2100,k:'loss',st:3}]}},
+ {id:'p3',t:'Nivel 3 · Inversiones Yécora, S.L.',enun:'800 acciones cotizadas a 15,00 € con 160 € de gastos de intermediación. Cotización de cierre: 16,25 €.',
+  lectura:'Misma estructura que Pelayo: coste sin gastos, gastos directos a resultado y ajuste por la diferencia de cotización.',
+  txt:['800 acciones cotizadas a 15,00 € más 160 € de gastos: cartera a valor razonable con cambios en resultados.','Coste activado en (540): 800 × 15,00 = 12.000 €. Los 160 € van directos a (669), sin activarse.','Cierre: 800 × 16,25 = 13.000 € de valor razonable.','Plusvalía = 13.000 − 12.000 = 1.000 € a resultados.'],
+  spec:{max:14000,bcol:['mut','cost','gain','gain'],
+   banners:['Cotizada → valor razonable con cambios en resultados','(540) 12.000 + (669) 160 / (572) 12.160','Cierre: 800 × 16,25 = 13.000 €','Plusvalía = 13.000 − 12.000 = +1.000 €'],
+   bars:[{l:'Coste activado',s:'(540) 800 × 15,00',v:12000,k:'cost',st:1},{l:'Gastos',s:'(669) directos',v:160,k:'gas',st:1},{l:'Valor razonable',s:'800 × 16,25',v:13000,k:'gain',st:2},{l:'Plusvalía',s:'a resultados',v:1000,k:'gain',st:3,a:.6,txt:'+1.000 €'}]}},
+ {id:'p4',t:'Nivel 4 · Reversión de un deterioro anterior',enun:'Deterioro previo de 3.650 € en Alcalá (valor contable 16.500 €, coste 20.150 €). El PN atribuible sube a 19.000 €.',
+  lectura:'El deterioro de participaciones a coste es reversible, pero con techo: el valor contable nunca supera el coste original.',
+  txt:['Situación de partida: coste 20.150 €, deterioro acumulado 3.650 €, valor contable 16.500 €.','El negocio mejora: el patrimonio neto atribuible sube a 19.000 €.','Techo: el valor contable no puede superar el coste. Margen máximo de reversión = 20.150 − 16.500 = 3.650 €.','Reversión = mín(19.000 − 16.500; 3.650) = 2.500 € a (293)/(796). Nuevo valor contable: 19.000 €.'],
+  spec:{max:22000,bcol:['mut','gas','div','gain'],
+   banners:['Coste 20.150 € · deterioro 3.650 € · valor contable 16.500 €','PN atribuible sube a 19.000 €','Margen máximo hasta el coste: 20.150 − 16.500 = 3.650 €','Reversión = mín(2.500; 3.650) = 2.500 € · (293)/(796)'],
+   bars:[{l:'Coste original',s:'techo',v:20150,k:'cost',st:0},{l:'Valor contable',s:'tras deterioro',v:16500,k:'loss',st:0,a:.85},{l:'PN atribuible',s:'hoy',v:19000,k:'gas',st:1},{l:'Margen máx.',s:'coste − VC',v:3650,k:'div',st:2},{l:'Reversión',s:'mín(2.500; 3.650)',v:2500,k:'gain',st:3}],
+   lines:[{v:20150,l:'Techo: coste original 20.150 €',st:2}]}}
+];
+EJ.forEach(e=>{
+  e.step=0;e.timer=null;
+  $(e.id).innerHTML=`<div class="card"><h2>${e.t}</h2><p class="sub">${e.enun}</p>
+   <div class="stage"><svg id="${e.id}svg" viewBox="0 0 760 420"></svg></div>
+   <div class="steps" id="${e.id}dots">${e.txt.map(()=>'<span class="dot"></span>').join('')}</div>
+   <div class="say" id="${e.id}say"></div>
+   <div class="row"><button class="btn primary" id="${e.id}play">▶ Reproducir</button><button class="btn" id="${e.id}prev">← Paso</button><button class="btn" id="${e.id}next">Paso →</button></div>
+   <p class="sub" style="margin-top:12px"><b>Lectura:</b> ${e.lectura}</p></div>`;
+  const render=(n,instant)=>{
+    e.step=n;document.querySelectorAll('#'+e.id+'dots .dot').forEach((x,i)=>x.classList.toggle('on',i===n));
+    $(e.id+'say').textContent=e.txt[n];
+    const svg=$(e.id+'svg');
+    if(instant){drawBars(svg,e.spec,n,1);return}
+    tween(0,1,1000,p=>drawBars(svg,e.spec,n,p));
+  };
+  const stop=()=>{clearInterval(e.timer);e.timer=null;$(e.id+'play').textContent='▶ Reproducir'};
+  $(e.id+'play').onclick=()=>{if(e.timer){stop();return}if(e.step>=e.txt.length-1)e.step=-1;$(e.id+'play').textContent='⏸ Pausa';
+    const go=()=>{if(e.step>=e.txt.length-1){stop();return}render(e.step+1)};go();e.timer=setInterval(go,2600)};
+  $(e.id+'next').onclick=()=>{stop();render(Math.min(e.txt.length-1,e.step+1))};
+  $(e.id+'prev').onclick=()=>{stop();render(Math.max(0,e.step-1),true)};
+  e.render=render;render(0,true);
+});
+
+/* init */
+renderMain(0,true);drawFork(1);updateVr(false);updateDet();updateVenta(false);
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{renderMain(ms,true);drawFork(1);drawVr(vrCur);drawDet();drawVenta(vCur);EJ.forEach(e=>e.render(e.step,true))});
+</script>
+</body>
+</html>

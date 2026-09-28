@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tema 8 · Constitución y dividendo pasivo, animado</title>
+<style>
+:root{
+  --bg:#f7f5f0;--card:#fffdf8;--ink:#1d2433;--mut:#6b7385;--line:#e3ded2;
+  --cap:#2f6f9f;--banco:#3f8f6b;--noex:#c8862a;--exig:#c2453a;--puente:#7a4fa3;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#14171f;--card:#1c202b;--ink:#eceff6;--mut:#98a1b5;--line:#2c3242;
+  --cap:#5fa8dc;--banco:#5cc496;--noex:#e0a04a;--exig:#e2695d;--puente:#a98bd0;}
+}
+:root[data-theme="dark"]{--bg:#14171f;--card:#1c202b;--ink:#eceff6;--mut:#98a1b5;--line:#2c3242;
+  --cap:#5fa8dc;--banco:#5cc496;--noex:#e0a04a;--exig:#e2695d;--puente:#a98bd0;}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:28px 20px 8px;max-width:980px;margin:0 auto}
+header small{color:var(--mut);letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+h1{margin:6px 0 6px;font-size:clamp(24px,5vw,38px);line-height:1.15}
+header p{color:var(--mut);margin:0;max-width:62ch}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:6px;overflow-x:auto;padding:10px 20px}
+nav button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer;font:inherit;font-size:14px}
+nav button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+main{max-width:980px;margin:0 auto;padding:18px 20px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:18px}
+.card h2{margin:0 0 4px;font-size:20px}
+.card .sub{color:var(--mut);margin:0 0 14px;font-size:14px}
+.stage{width:100%;overflow-x:auto}
+svg{display:block;width:100%;height:auto;max-width:100%}
+.ctrls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 18px;margin:14px 0}
+.ctrls label{font-size:13px;color:var(--mut);display:block}
+.ctrls output{color:var(--ink);font-weight:600;float:right}
+input[type=range]{width:100%;accent-color:var(--cap)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:10px;cursor:pointer;font:inherit;font-size:14px}
+.btn.primary{background:var(--cap);border-color:var(--cap);color:#fff}
+.btn.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--line);transition:.3s}
+.dot.on{background:var(--cap);transform:scale(1.4)}
+.say{min-height:3.2em;margin:10px 0 0;padding:10px 12px;border-left:4px solid var(--cap);background:color-mix(in srgb,var(--cap) 8%,transparent);border-radius:0 10px 10px 0;font-size:15px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--mut);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
+.ok{color:var(--banco);font-weight:600}.bad{color:var(--exig);font-weight:600}
+.num{font-variant-numeric:tabular-nums}
+.panel{display:none}.panel.on{display:block}
+text{font-family:inherit}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}
+.tbl td,.tbl th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.tbl td:last-child,.tbl th:last-child{text-align:right}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <small>Tema 8 · Patrimonio neto y operaciones de capital</small>
+  <h1>Prometer capital y pagarlo poco a poco</h1>
+  <p>El capital social nace entero el día de la escritura. Lo que falta por pagar es un derecho de cobro que viaja de «no exigido» a «exigido» y por último al banco. Míralo en movimiento.</p>
+</header>
+<nav id="nav"></nav>
+
+<main>
+<!-- ============ PRINCIPAL ============ -->
+<section class="panel on" id="p0">
+  <div class="card">
+    <h2>Ejemplo guiado: Comercial Robledo, S.A.</h2>
+    <p class="sub">3.000 acciones de 100 € (capital 300.000 €), con solo el 25 % desembolsado. Pulsa «Reproducir».</p>
+    <div class="stage"><svg id="mainSvg" viewBox="0 0 760 430" role="img" aria-label="El capital suscrito se reparte entre banco y socios pendientes"></svg></div>
+    <div class="steps" id="dotsMain"></div>
+    <div class="say" id="sayMain"></div>
+    <div class="row">
+      <button class="btn primary" id="playMain">▶ Reproducir</button>
+      <button class="btn" id="prevMain">← Paso</button>
+      <button class="btn" id="nextMain">Paso →</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>El viaje del dividendo pasivo</h2>
+    <p class="sub">La deuda de los socios cambia de cuenta, pero el capital (100) no se mueve. Sigue el 75 % pendiente en su recorrido.</p>
+    <div class="stage"><svg id="tripSvg" viewBox="0 0 760 260" role="img" aria-label="Recorrido del dividendo pasivo por tres cuentas"></svg></div>
+    <div class="say" id="tripSay"></div>
+    <div class="row"><button class="btn primary" id="tripPlay">▶ Recorrer</button><button class="btn" id="tripReset">↺ Reiniciar</button></div>
+  </div>
+
+  <div class="card">
+    <h2>Simulador del % desembolsado</h2>
+    <p class="sub">El capital social nunca cambia con el porcentaje: solo cambia cuánto entra ya en el banco. En una S.A. el mínimo es el 25 %.</p>
+    <div class="ctrls">
+      <div><label>Capital social total <output id="oCap"></output></label><input type="range" id="sCap" min="60000" max="1000000" step="10000" value="300000"></div>
+      <div><label>Valor nominal por acción <output id="oNom"></output></label><input type="range" id="sNom" min="10" max="200" step="10" value="100"></div>
+      <div><label>% desembolsado <output id="oPct"></output></label><input type="range" id="sPct" min="25" max="100" step="5" value="25"></div>
+    </div>
+    <div class="stage"><svg id="simSvg" viewBox="0 0 760 220" role="img" aria-label="Reparto entre desembolsado y pendiente"></svg></div>
+    <div class="legend">
+      <span><i style="background:var(--banco)"></i>Desembolsado (572)</span>
+      <span><i style="background:var(--noex)"></i>Pendiente (103)</span>
+    </div>
+    <table class="tbl num" id="simTbl"></table>
+  </div>
+
+  <div class="card">
+    <h2>Variante: socio moroso</h2>
+    <p class="sub">Si un socio no paga cuando se le exige, el capital sigue intacto: solo queda un derecho de cobro vencido y reclamable.</p>
+    <div class="ctrls">
+      <div><label>% de socios que pagan lo exigido <output id="oPaga"></output></label><input type="range" id="sPaga" min="0" max="100" step="5" value="75"></div>
+    </div>
+    <div class="stage"><svg id="morSvg" viewBox="0 0 760 240" role="img" aria-label="Efecto de un socio moroso sobre el cobro"></svg></div>
+    <div class="say" id="morSay"></div>
+  </div>
+</section>
+
+<section class="panel" id="p1"></section>
+<section class="panel" id="p2"></section>
+<section class="panel" id="p3"></section>
+<section class="panel" id="p4"></section>
+</main>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const fmt=n=>n.toLocaleString('es-ES',{maximumFractionDigits:0})+' €';
+const fmt2=n=>n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const el=(t,a={},p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const reduced=()=>matchMedia('(prefers-reduced-motion:reduce)').matches;
+function tween(a,b,ms,cb,done){if(reduced()){cb(b);done&&done();return}
+  const t0=performance.now();(function f(n){const p=Math.min(1,(n-t0)/ms);cb(a+(b-a)*ease(p));p<1?requestAnimationFrame(f):done&&done()})(t0)}
+const colors=()=>({cap:cssv('--cap'),banco:cssv('--banco'),noex:cssv('--noex'),exig:cssv('--exig'),pue:cssv('--puente'),ink:cssv('--ink'),mut:cssv('--mut'),line:cssv('--line')});
+
+/* nav */
+['Principal','Nivel 1','Nivel 2','Nivel 3','Nivel 4'].forEach((t,i)=>{
+  const b=document.createElement('button');b.textContent=t;b.className=i?'':'on';
+  b.onclick=()=>{document.querySelectorAll('nav button').forEach((x,j)=>x.classList.toggle('on',j===i));
+    document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('on',j===i));window.scrollTo({top:0,behavior:'smooth'})};
+  $('nav').appendChild(b)});
+
+/* ---------- ESCENA: capital total (izq) frente a cuentas de activo (der) ----------
+ o = {maxV, capV, puenteV, bancoV, noexV, exigV, cobradoV(banco extra), bar, barCol, note, showPuente, arrows}
+ Columnas: (100) Capital | (190) Puente | (572) Bancos | (103) No exigidos | (5580) Exigidos */
+function drawScene(svg,o){
+  svg.innerHTML='';const c=colors();
+  const H=430,base=350,top=70,hMax=base-top;
+  const V=o.maxV,sc=v=>Math.max(0,v)/V*hMax;
+  const cw=104;
+  const cols=[
+    {k:'cap',x:20,lab:'(100) Capital',col:c.cap,v:o.capV},
+    {k:'pue',x:170,lab:'(190) Puente',col:c.pue,v:o.puenteV,hide:!o.showPuente},
+    {k:'banco',x:320,lab:'(572) Bancos',col:c.banco,v:o.bancoV},
+    {k:'noex',x:470,lab:'(103) No exigido',col:c.noex,v:o.noexV},
+    {k:'exig',x:620,lab:'(5580) Exigido',col:c.exig,v:o.exigV}
+  ];
+  el('line',{x1:10,x2:750,y1:base,y2:base,stroke:c.line,'stroke-width':2},svg);
+  cols.forEach(cl=>{
+    if(cl.hide)return;
+    // marco punteado de capacidad total
+    el('rect',{x:cl.x,y:base-sc(o.capTotal),width:cw,height:sc(o.capTotal),rx:8,fill:'none',stroke:cl.col,'stroke-dasharray':'4 5',opacity:.35},svg);
+    const h=sc(cl.v);
+    el('rect',{x:cl.x,y:base-h,width:cw,height:h,rx:8,fill:cl.col,opacity:.92},svg);
+    el('text',{x:cl.x+cw/2,y:base+20,'text-anchor':'middle',fill:c.ink,'font-size':12,'font-weight':600},svg).textContent=cl.lab;
+    if(h>24)el('text',{x:cl.x+cw/2,y:base-h+21,'text-anchor':'middle',fill:'#fff','font-size':13,'font-weight':700},svg).textContent=fmt(cl.v);
+    if(cl.k==='pue'&&cl.v<=1&&o.puenteDone)el('text',{x:cl.x+cw/2,y:base-14,'text-anchor':'middle',fill:c.pue,'font-size':13,'font-weight':700},svg).textContent='saldada ✓';
+  });
+  // barra superior
+  el('rect',{x:20,y:12,width:720,height:38,rx:10,fill:'none',stroke:o.barCol||c.cap,'stroke-width':1.5},svg);
+  el('text',{x:380,y:36,'text-anchor':'middle',fill:o.barCol||c.cap,'font-size':14,'font-weight':700},svg).textContent=o.bar||'';
+  if(o.note)el('text',{x:380,y:H-8,'text-anchor':'middle',fill:c.mut,'font-size':13},svg).textContent=o.note;
+}
+
+/* ---------- PRINCIPAL ---------- */
+const CAP=300000,DES=75000,PEN=225000;
+const mainTxt=[
+ 'Cuatro socios suscriben 3.000 acciones de 100 € ante notario: 300.000 € de capital. Desde ahora deben esa cantidad a la sociedad.',
+ 'Suscripción: (190) 300.000 D / (100) Capital 300.000 H. El capital nace ENTERO, aunque nadie haya pagado aún.',
+ 'Desembolso mínimo del 25 % en una S.A.: 300.000 × 25 % = 75.000 € entran en (572) Bancos.',
+ 'Los 225.000 € restantes son un derecho de cobro frente a los socios: van a (103) Socios, desembolsos no exigidos.',
+ 'Cuadre: 75.000 + 225.000 = 300.000 €. La cuenta puente (190) queda saldada; el capital sigue en 300.000 €.',
+ 'Un año después el consejo exige el pago: 225.000 € pasan de (103) a (5580) Socios, desembolsos exigidos.',
+ 'Los socios pagan: (572) Bancos 225.000 / (5580) 225.000. El capital nunca se movió; solo se cambió derecho de cobro por efectivo.'
+];
+$('dotsMain').innerHTML=mainTxt.map(()=>'<span class="dot"></span>').join('');
+let ms=0,mt=null;
+function stMain(n,p){
+  const b={maxV:CAP*1.05,capTotal:CAP,showPuente:true,capV:0,puenteV:0,bancoV:0,noexV:0,exigV:0};
+  if(n===0)return{...b,bar:'Suscripción: 3.000 acc. × 100 € = 300.000 €',barCol:cssv('--cap')};
+  if(n===1)return{...b,capV:CAP*p,puenteV:CAP*p,bar:'(190) 300.000 al Debe / (100) Capital 300.000 al Haber',barCol:cssv('--puente')};
+  if(n===2)return{...b,capV:CAP,puenteV:CAP-DES*p,bancoV:DES*p,bar:'Desembolso 25 %: '+fmt(DES*p)+' al banco',barCol:cssv('--banco')};
+  if(n===3)return{...b,capV:CAP,puenteV:CAP-DES-PEN*p,bancoV:DES,noexV:PEN*p,bar:'Pendiente 75 %: '+fmt(PEN*p)+' a (103)',barCol:cssv('--noex')};
+  if(n===4)return{...b,capV:CAP,puenteV:0,puenteDone:true,bancoV:DES,noexV:PEN,bar:'75.000 + 225.000 = 300.000 € ✓ · Capital = 300.000 €',barCol:cssv('--cap'),note:'El capital social se reconoce siempre por el importe íntegro suscrito.'};
+  if(n===5)return{...b,capV:CAP,puenteV:0,puenteDone:true,bancoV:DES,noexV:PEN*(1-p),exigV:PEN*p,bar:'Exigencia: (5580) 225.000 D / (103) 225.000 H',barCol:cssv('--exig')};
+  return{...b,capV:CAP,puenteV:0,puenteDone:true,bancoV:DES+PEN*p,noexV:0,exigV:PEN*(1-p),bar:'Cobro: (572) 225.000 D / (5580) 225.000 H · Banco = '+fmt(DES+PEN*p),barCol:cssv('--banco'),note:p>.95?'75.000 + 225.000 = 300.000 €: capital íntegramente desembolsado.':''};
+}
+function renderMain(n,instant){
+  ms=n;document.querySelectorAll('#dotsMain .dot').forEach((x,i)=>x.classList.toggle('on',i===n));
+  $('sayMain').textContent=mainTxt[n];
+  if(instant||n===0||n===4){drawScene($('mainSvg'),stMain(n,1));return}
+  tween(0,1,1100,p=>drawScene($('mainSvg'),stMain(n,p)));
+}
+function stopM(){clearInterval(mt);mt=null;$('playMain').textContent='▶ Reproducir'}
+$('playMain').onclick=()=>{if(mt){stopM();return}if(ms>=mainTxt.length-1)ms=-1;$('playMain').textContent='⏸ Pausa';
+  const go=()=>{if(ms>=mainTxt.length-1){stopM();return}renderMain(ms+1)};go();mt=setInterval(go,2800)};
+$('nextMain').onclick=()=>{stopM();renderMain(Math.min(mainTxt.length-1,ms+1))};
+$('prevMain').onclick=()=>{stopM();renderMain(Math.max(0,ms-1),true)};
+
+/* ---------- VIAJE del dividendo pasivo ---------- */
+// t: 0..3 => 0:no exigido, 1: exigido, 2: en banco
+function drawTrip(t){
+  const svg=$('tripSvg');svg.innerHTML='';const c=colors();
+  const xs=[110,330,550],labs=['(103) No exigido','(5580) Exigido','(572) Bancos'],cols=[c.noex,c.exig,c.banco];
+  el('rect',{x:20,y:20,width:720,height:44,rx:12,fill:c.cap,opacity:.9},svg);
+  el('text',{x:380,y:48,'text-anchor':'middle',fill:'#fff','font-size':15,'font-weight':700},svg).textContent='(100) Capital social = 300.000 € — inmóvil durante todo el viaje';
+  xs.forEach((x,i)=>{
+    el('rect',{x:x-70,y:120,width:140,height:70,rx:12,fill:'none',stroke:cols[i],'stroke-width':2,'stroke-dasharray':i===0?'0':'5 4',opacity:.8},svg);
+    el('text',{x,y:212,'text-anchor':'middle',fill:c.ink,'font-size':13,'font-weight':600},svg).textContent=labs[i];
+  });
+  [0,1].forEach(i=>el('path',{d:`M ${xs[i]+76} 155 L ${xs[i+1]-76} 155`,stroke:c.mut,'stroke-width':2,'stroke-dasharray':'5 5',fill:'none'},svg));
+  // moneda
+  const pos=Math.min(2,Math.max(0,t));
+  const i0=Math.floor(pos),i1=Math.min(2,i0+1),f=pos-i0;
+  const cx=xs[i0]+(xs[i1]-xs[i0])*f;
+  const col=pos<1?cols[0]:pos<2?cols[1]:cols[2];
+  el('circle',{cx,cy:155,r:26,fill:col},svg);
+  el('text',{x:cx,y:150,'text-anchor':'middle',fill:'#fff','font-size':11,'font-weight':700},svg).textContent='225.000';
+  el('text',{x:cx,y:165,'text-anchor':'middle',fill:'#fff','font-size':11,'font-weight':700},svg).textContent='€';
+  $('tripSay').textContent=pos<.05?'Tras la constitución: 225.000 € pendientes y aún no reclamados, en (103).':pos<1.05&&pos>.95?'El consejo lo reclama: pasa a (5580), ya es una deuda vencida y exigible.':pos>1.95?'Cobrado: 225.000 € en el banco. Capital sin tocar; solo se cambió un derecho de cobro por efectivo.':'En tránsito…';
+}
+drawTrip(0);
+$('tripPlay').onclick=()=>tween(0,2,2600,drawTrip);
+$('tripReset').onclick=()=>drawTrip(0);
+
+/* ---------- SIMULADOR % ---------- */
+const S={cap:300000,nom:100,pct:25};
+let simCur={des:75000,pen:225000};
+function drawSim(cur,cap){
+  const svg=$('simSvg');svg.innerHTML='';const c=colors();
+  const x0=30,w=700,y=80,h=70;
+  el('rect',{x:x0,y,width:w,height:h,rx:14,fill:'none',stroke:c.line,'stroke-width':2},svg);
+  el('text',{x:x0,y:y-16,fill:c.mut,'font-size':13},svg).textContent='Capital social total: '+fmt(cap)+' (siempre íntegro)';
+  const wd=cur.des/cap*w,wp=cur.pen/cap*w;
+  if(wd>0){el('rect',{x:x0,y,width:wd,height:h,rx:14,fill:c.banco},svg);if(wd>70)el('text',{x:x0+wd/2,y:y+h/2+5,'text-anchor':'middle',fill:'#fff','font-size':14,'font-weight':700},svg).textContent=fmt(cur.des)}
+  if(wp>0){el('rect',{x:x0+wd,y,width:wp,height:h,rx:14,fill:c.noex},svg);if(wp>70)el('text',{x:x0+wd+wp/2,y:y+h/2+5,'text-anchor':'middle',fill:'#fff','font-size':14,'font-weight':700},svg).textContent=fmt(cur.pen)}
+  // marca del 25% mínimo
+  const mx=x0+w*.25;
+  el('line',{x1:mx,x2:mx,y1:y-6,y2:y+h+22,stroke:c.exig,'stroke-width':2},svg);
+  el('text',{x:mx,y:y+h+38,'text-anchor':'middle',fill:c.exig,'font-size':12,'font-weight':700},svg).textContent='mínimo legal S.A. 25 %';
+}
+function updateSim(anim=true){
+  const n=S.cap/S.nom;
+  const des=S.cap*S.pct/100,pen=S.cap-des;
+  $('oCap').textContent=fmt(S.cap);$('oNom').textContent=fmt(S.nom);$('oPct').textContent=S.pct+' %';
+  const from={...simCur},to={des,pen};const t0=performance.now();
+  const step=nn=>{const p=reduced()?1:Math.min(1,(nn-t0)/450),e=ease(p);
+    simCur={des:from.des+(to.des-from.des)*e,pen:from.pen+(to.pen-from.pen)*e};drawSim(simCur,S.cap);if(p<1)requestAnimationFrame(step)};
+  anim?requestAnimationFrame(step):(simCur=to,drawSim(simCur,S.cap));
+  $('simTbl').innerHTML=`<tr><th>Concepto</th><th>Importe</th></tr>
+   <tr><td>Número de acciones (nominal ${fmt2(S.nom)})</td><td>${n.toLocaleString('es-ES',{maximumFractionDigits:2})}</td></tr>
+   <tr><td>Desembolsado en la constitución (${S.pct} %)</td><td>${fmt2(des)}</td></tr>
+   <tr><td>Pendiente de desembolso (${100-S.pct} %)</td><td>${fmt2(pen)}</td></tr>
+   <tr><th>Capital social total</th><th class="ok">${fmt2(des+pen)}</th></tr>`;
+}
+[['sCap','cap'],['sNom','nom'],['sPct','pct']].forEach(([id,k])=>$(id).addEventListener('input',e=>{S[k]=+e.target.value;updateSim()}));
+
+/* ---------- MOROSO ---------- */
+function drawMor(){
+  const pct=+$('sPaga').value;$('oPaga').textContent=pct+' %';
+  const svg=$('morSvg');svg.innerHTML='';const c=colors();
+  const exigido=225000,paga=exigido*pct/100,mora=exigido-paga;
+  const x0=30,w=700,y=70,h=70;
+  el('rect',{x:x0,y,width:w,height:h,rx:14,fill:'none',stroke:c.line,'stroke-width':2},svg);
+  el('text',{x:x0,y:y-16,fill:c.mut,'font-size':13},svg).textContent='Dividendo pasivo exigido: '+fmt(exigido);
+  const wp=paga/exigido*w,wm=mora/exigido*w;
+  if(wp>0){el('rect',{x:x0,y,width:wp,height:h,rx:14,fill:c.banco},svg);if(wp>80)el('text',{x:x0+wp/2,y:y+h/2+5,'text-anchor':'middle',fill:'#fff','font-size':14,'font-weight':700},svg).textContent='Cobrado '+fmt(paga)}
+  if(wm>0){el('rect',{x:x0+wp,y,width:wm,height:h,rx:14,fill:c.exig},svg);if(wm>80)el('text',{x:x0+wp+wm/2,y:y+h/2+5,'text-anchor':'middle',fill:'#fff','font-size':14,'font-weight':700},svg).textContent='Moroso '+fmt(mora)}
+  el('rect',{x:x0,y:y+h+30,width:w,height:36,rx:10,fill:c.cap,opacity:.9},svg);
+  el('text',{x:380,y:y+h+54,'text-anchor':'middle',fill:'#fff','font-size':14,'font-weight':700},svg).textContent='(100) Capital social = 300.000 € (no cambia)';
+  $('morSay').innerHTML=mora>0?`Quedan <b>${fmt(mora)}</b> sin cobrar en (5580): un derecho de cobro vencido, con posibles intereses de demora. El capital social no se reduce.`:'Todos han pagado: (5580) queda a cero y el capital está íntegramente desembolsado.';
+}
+$('sPaga').addEventListener('input',drawMor);
+
+/* ---------- EJERCICIOS ---------- */
+const EJ=[
+ {id:'p1',t:'Nivel 1 · Desembolso del 100 % (S.L.)',enun:'S.L. con capital 100.000 € (1.000 participaciones de 100 €), íntegramente desembolsadas en efectivo.',
+  cap:100000,des:100000,mode:'simple',
+  txt:['Constitución de una S.L.: capital 100.000 €, desembolsado íntegro el mismo día.','No hay parte pendiente: en una S.L. el desembolso es siempre del 100 %.','Asiento único: (572) Bancos 100.000 D / (100) Capital 100.000 H. Sin (190), (103) ni (5580).','Cuadre: 100.000 € en el banco = 100.000 € de capital ✓'],
+  lectura:'Con desembolso del 100 %, capital y efectivo coinciden y la cuenta puente (190) no llega a necesitarse.'},
+ {id:'p2',t:'Nivel 2 · Aportación mixta: dineraria y no dineraria',enun:'S.L. con capital 60.000 €: un socio aporta 40.000 € en efectivo y otro un local valorado en 20.000 €.',
+  cap:60000,mode:'mixta',
+  txt:['Capital 60.000 €: dos socios aportan de forma distinta.','Un socio aporta 40.000 € en efectivo → (572) Bancos.','El otro aporta un local de 20.000 € → (211) Construcciones.','Asiento: (572) 40.000 + (211) 20.000 D / (100) Capital 60.000 H. Cuadra: 40.000 + 20.000 = 60.000 € ✓'],
+  lectura:'Que la aportación sea en especie no cambia el capital: solo cambia qué cuenta de activo se carga.'},
+ {id:'p3',t:'Nivel 3 · Ferretería Casal, S.A.',enun:'Capital 500.000 € (5.000 acciones de 100 €), desembolsando el 25 % mínimo.',
+  cap:500000,des:125000,mode:'parcial',
+  txt:['5.000 acciones de 100 € = 500.000 € de capital suscrito.','Desembolsado (25 %): 500.000 × 25 % = 125.000 € → (572) Bancos.','Pendiente (75 %): 500.000 − 125.000 = 375.000 € → (103) No exigido.','Asiento: (572) 125.000 + (103) 375.000 D / (100) 500.000 H (vía 190). Cuadra ✓'],
+  lectura:'Misma estructura que Robledo con otros importes: el método no cambia.'},
+ {id:'p4',t:'Nivel 4 · Exigencia parcial del dividendo pasivo',enun:'Tras un año, el consejo de Robledo exige solo el 40 % de los 225.000 € pendientes.',
+  cap:300000,mode:'exig',
+  txt:['Situación tras la constitución: 75.000 € en el banco y 225.000 € en (103).','El consejo exige solo el 40 %: 225.000 × 40 % = 90.000 €.','Traspaso: (5580) 90.000 D / (103) 90.000 H. Quedan 135.000 € todavía sin exigir en (103).','El capital social sigue en 300.000 €. El resto se exigirá en otra ocasión.'],
+  lectura:'El consejo puede exigir el dividendo pasivo por tramos; cada exigencia mueve solo esa parte.'}
+];
+EJ.forEach(e=>{
+  e.step=0;e.timer=null;
+  $(e.id).innerHTML=`<div class="card"><h2>${e.t}</h2><p class="sub">${e.enun}</p>
+   <div class="stage"><svg id="${e.id}svg" viewBox="0 0 760 430"></svg></div>
+   <div class="steps" id="${e.id}dots">${e.txt.map(()=>'<span class="dot"></span>').join('')}</div>
+   <div class="say" id="${e.id}say"></div>
+   <div class="row"><button class="btn primary" id="${e.id}play">▶ Reproducir</button><button class="btn" id="${e.id}prev">← Paso</button><button class="btn" id="${e.id}next">Paso →</button></div>
+   <p class="sub" style="margin-top:12px"><b>Lectura:</b> ${e.lectura}</p></div>`;
+  const CAPe=e.cap;
+  const st=(n,p)=>{
+    const b={maxV:CAPe*1.05,capTotal:CAPe,showPuente:false,capV:0,puenteV:0,bancoV:0,noexV:0,exigV:0};
+    if(e.mode==='simple'){
+      if(n===0)return{...b,bar:'S.L.: capital 100.000 € desembolsado al 100 %',barCol:cssv('--cap')};
+      if(n===1)return{...b,capV:CAPe*p,bancoV:CAPe*p,bar:'Sin parte pendiente: (103) y (5580) a cero',barCol:cssv('--banco')};
+      if(n===2)return{...b,capV:CAPe,bancoV:CAPe,bar:'(572) 100.000 D / (100) 100.000 H',barCol:cssv('--cap')};
+      return{...b,capV:CAPe,bancoV:CAPe,bar:'100.000 en el banco = 100.000 de capital ✓',barCol:cssv('--banco'),note:'No se necesita la cuenta puente (190).'};
+    }
+    if(e.mode==='mixta'){
+      // usamos columnas: capital, bancos (40k), y (103) reutilizada como 'Construcciones' visual
+      const cols={...b};
+      if(n===0)return{...b,bar:'Capital 60.000 €: aportación de dos socios',barCol:cssv('--cap')};
+      if(n===1)return{...b,capV:60000*p*0.667,bancoV:40000*p,bar:'Efectivo: 40.000 € → (572) Bancos',barCol:cssv('--banco')};
+      if(n===2)return{...b,capV:60000*(0.667+0.333*p),bancoV:40000,noexV:20000*p,bar:'Local 20.000 € → (211) Construcciones (columna naranja)',barCol:cssv('--noex')};
+      return{...b,capV:60000,bancoV:40000,noexV:20000,bar:'40.000 + 20.000 = 60.000 € ✓',barCol:cssv('--cap'),note:'La columna naranja representa aquí el activo no dinerario (211), no un pendiente.'};
+    }
+    if(e.mode==='parcial'){
+      const DE=125000,PE=375000;
+      if(n===0)return{...b,showPuente:true,bar:'500.000 € suscritos',barCol:cssv('--cap')};
+      if(n===1)return{...b,showPuente:true,capV:CAPe,puenteV:CAPe-DE*p,bancoV:DE*p,bar:'25 %: '+fmt(DE*p)+' al banco',barCol:cssv('--banco')};
+      if(n===2)return{...b,showPuente:true,capV:CAPe,puenteV:PE*(1-p),bancoV:DE,noexV:PE*p,bar:'75 %: '+fmt(PE*p)+' a (103)',barCol:cssv('--noex')};
+      return{...b,showPuente:true,capV:CAPe,puenteV:0,puenteDone:true,bancoV:DE,noexV:PE,bar:'125.000 + 375.000 = 500.000 € ✓',barCol:cssv('--cap'),note:'(190) queda saldada; el capital social es 500.000 €.'};
+    }
+    // exig
+    if(n===0)return{...b,capV:CAPe,bancoV:75000,noexV:225000,bar:'Tras la constitución: 75.000 € en banco · 225.000 € en (103)',barCol:cssv('--noex')};
+    if(n===1)return{...b,capV:CAPe,bancoV:75000,noexV:225000,bar:'Exigencia del 40 %: 225.000 × 40 % = 90.000 €',barCol:cssv('--exig')};
+    if(n===2)return{...b,capV:CAPe,bancoV:75000,noexV:225000-90000*p,exigV:90000*p,bar:'(5580) 90.000 D / (103) 90.000 H',barCol:cssv('--exig')};
+    return{...b,capV:CAPe,bancoV:75000,noexV:135000,exigV:90000,bar:'Exigido 90.000 + no exigido 135.000 = 225.000 € ✓',barCol:cssv('--cap'),note:'El capital social sigue en 300.000 €.'};
+  };
+  const render=(n,instant)=>{
+    e.step=n;document.querySelectorAll('#'+e.id+'dots .dot').forEach((x,i)=>x.classList.toggle('on',i===n));
+    $(e.id+'say').textContent=e.txt[n];
+    const svg=$(e.id+'svg');
+    if(instant||n===0){drawScene(svg,st(n,1));return}
+    tween(0,1,1000,p=>drawScene(svg,st(n,p)));
+  };
+  const stop=()=>{clearInterval(e.timer);e.timer=null;$(e.id+'play').textContent='▶ Reproducir'};
+  $(e.id+'play').onclick=()=>{if(e.timer){stop();return}if(e.step>=e.txt.length-1)e.step=-1;$(e.id+'play').textContent='⏸ Pausa';
+    const go=()=>{if(e.step>=e.txt.length-1){stop();return}render(e.step+1)};go();e.timer=setInterval(go,2600)};
+  $(e.id+'next').onclick=()=>{stop();render(Math.min(e.txt.length-1,e.step+1))};
+  $(e.id+'prev').onclick=()=>{stop();render(Math.max(0,e.step-1),true)};
+  e.render=render;render(0,true);
+});
+
+/* init */
+renderMain(0,true);updateSim(false);drawMor();
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{renderMain(ms,true);updateSim(false);drawTrip(0);drawMor();EJ.forEach(e=>e.render(e.step,true))});
+</script>
+</body>
+</html>

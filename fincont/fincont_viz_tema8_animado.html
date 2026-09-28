@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tema 8 · Aplicación del resultado, animado</title>
+<style>
+:root{
+  --bg:#f7f5f0;--card:#fffdf8;--ink:#1d2433;--mut:#6b7385;--line:#e3ded2;
+  --legal:#c8862a;--div:#2f6f9f;--vol:#3f8f6b;--res:#7a4fa3;--tope:#c2453a;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root:not([data-theme="light"]){}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#14171f;--card:#1c202b;--ink:#eceff6;--mut:#98a1b5;--line:#2c3242;
+  --legal:#e0a04a;--div:#5fa8dc;--vol:#5cc496;--res:#a98bd0;--tope:#e2695d;}
+}
+:root[data-theme="dark"]{--bg:#14171f;--card:#1c202b;--ink:#eceff6;--mut:#98a1b5;--line:#2c3242;
+  --legal:#e0a04a;--div:#5fa8dc;--vol:#5cc496;--res:#a98bd0;--tope:#e2695d;}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:28px 20px 8px;max-width:980px;margin:0 auto}
+header small{color:var(--mut);letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+h1{margin:6px 0 6px;font-size:clamp(24px,5vw,38px);line-height:1.15}
+header p{color:var(--mut);margin:0;max-width:62ch}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
+  display:flex;gap:6px;overflow-x:auto;padding:10px 20px;max-width:none}
+nav button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer;font:inherit;font-size:14px}
+nav button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+main{max-width:980px;margin:0 auto;padding:18px 20px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:18px}
+.card h2{margin:0 0 4px;font-size:20px}
+.card .sub{color:var(--mut);margin:0 0 14px;font-size:14px}
+.stage{width:100%;overflow-x:auto}
+svg{display:block;width:100%;height:auto;max-width:100%}
+.ctrls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 18px;margin:14px 0}
+.ctrls label{font-size:13px;color:var(--mut);display:block}
+.ctrls output{color:var(--ink);font-weight:600;float:right}
+input[type=range]{width:100%;accent-color:var(--div)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:10px;cursor:pointer;font:inherit;font-size:14px}
+.btn.primary{background:var(--div);border-color:var(--div);color:#fff}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--line);transition:.3s}
+.dot.on{background:var(--div);transform:scale(1.4)}
+.say{min-height:3.2em;margin:10px 0 0;padding:10px 12px;border-left:4px solid var(--div);background:color-mix(in srgb,var(--div) 8%,transparent);border-radius:0 10px 10px 0;font-size:15px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.chip{padding:4px 10px;border-radius:999px;font-size:13px;color:#fff}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--mut);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:baseline}
+.ok{color:var(--vol);font-weight:600}
+.bad{color:var(--tope);font-weight:600}
+.num{font-variant-numeric:tabular-nums}
+.panel{display:none}.panel.on{display:block}
+text{font-family:inherit}
+.t-mut{fill:var(--mut)}.t-ink{fill:var(--ink)}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}
+.tbl td,.tbl th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.tbl td:last-child,.tbl th:last-child{text-align:right}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <small>Tema 8 · Patrimonio neto y operaciones de capital</small>
+  <h1>Repartir un beneficio en tres cajones, en movimiento</h1>
+  <p>Cada ejercicio con su animación: el dinero fluye, la hucha se llena hasta el tope del 20 % y el asiento se construye paso a paso. Toca los controles.</p>
+</header>
+
+<nav id="nav"></nav>
+
+<main>
+  <!-- ========== PRINCIPAL ========== -->
+  <section class="panel on" id="p0">
+    <div class="card">
+      <h2>Ejemplo guiado: Bodegas Sarriá, S.A.</h2>
+      <p class="sub">250.000 € de beneficio, capital 400.000 €, reserva legal actual 72.000 €. Pulsa «Reproducir» y sigue el dinero.</p>
+      <div class="stage"><svg id="flowMain" viewBox="0 0 760 400" role="img" aria-label="Flujo del beneficio hacia reserva legal, dividendos y reservas voluntarias"></svg></div>
+      <div class="steps" id="dotsMain"></div>
+      <div class="say" id="sayMain"></div>
+      <div class="row">
+        <button class="btn primary" id="playMain">▶ Reproducir</button>
+        <button class="btn" id="prevMain">← Paso</button>
+        <button class="btn" id="nextMain">Paso →</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Simulador interactivo</h2>
+      <p class="sub">Cambia los datos: la dotación a reserva legal se recalcula con el tope del 20 % y la reserva voluntaria cierra el reparto.</p>
+      <div class="ctrls">
+        <div><label>Capital social <output id="oCap"></output></label><input type="range" id="sCap" min="50000" max="1000000" step="5000" value="400000"></div>
+        <div><label>Reserva legal actual <output id="oRl"></output></label><input type="range" id="sRl" min="0" max="200000" step="1000" value="72000"></div>
+        <div><label>Resultado del ejercicio <output id="oRes"></output></label><input type="range" id="sRes" min="10000" max="600000" step="5000" value="250000"></div>
+        <div><label>Dividendos acordados <output id="oDiv"></output></label><input type="range" id="sDiv" min="0" max="600000" step="5000" value="120000"></div>
+      </div>
+      <div class="stage"><svg id="simSvg" viewBox="0 0 760 300" role="img" aria-label="Reparto del resultado"></svg></div>
+      <div class="legend">
+        <span><i style="background:var(--legal)"></i>Reserva legal</span>
+        <span><i style="background:var(--div)"></i>Dividendos</span>
+        <span><i style="background:var(--vol)"></i>Reserva voluntaria</span>
+      </div>
+      <table class="tbl num" id="simTbl"></table>
+    </div>
+
+    <div class="card">
+      <h2>La hucha con tope del 20 %</h2>
+      <p class="sub">La reserva legal es una hucha con marca de llenado. Mueve la reserva actual y mira cuánto cabe.</p>
+      <div class="ctrls">
+        <div><label>Reserva legal actual <output id="oRl2"></output></label><input type="range" id="sRl2" min="0" max="80000" step="500" value="72000"></div>
+      </div>
+      <div class="stage"><svg id="jar" viewBox="0 0 760 260" role="img" aria-label="Hucha de la reserva legal"></svg></div>
+      <div class="say" id="jarSay"></div>
+    </div>
+  </section>
+
+  <!-- ========== N1..N4 ========== -->
+  <section class="panel" id="p1"></section>
+  <section class="panel" id="p2"></section>
+  <section class="panel" id="p3"></section>
+  <section class="panel" id="p4"></section>
+</main>
+
+<script>
+/* ---------- utilidades ---------- */
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const fmt=n=>n.toLocaleString('es-ES',{minimumFractionDigits:0,maximumFractionDigits:0})+' €';
+const fmt2=n=>n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const svgEl=(tag,attrs={},parent)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;};
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+function tween(from,to,ms,cb,done){const t0=performance.now();
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches){cb(to);done&&done();return}
+  (function f(now){const p=Math.min(1,(now-t0)/ms);cb(from+(to-from)*ease(p));p<1?requestAnimationFrame(f):done&&done()})(t0)}
+function calc(cap,rl,res,div){
+  const teo=res*0.10, lim=cap*0.20, margen=Math.max(0,lim-rl);
+  const dot=Math.max(0,Math.min(teo,margen));
+  const vol=res-dot-div;
+  return {teo,lim,margen,dot,vol};
+}
+
+/* ---------- navegación ---------- */
+const tabs=['Principal','Nivel 1','Nivel 2','Nivel 3','Nivel 4'];
+tabs.forEach((t,i)=>{const b=document.createElement('button');b.textContent=t;b.className=i?'':'on';
+  b.onclick=()=>{document.querySelectorAll('nav button').forEach((x,j)=>x.classList.toggle('on',j===i));
+    document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('on',j===i));window.scrollTo({top:0,behavior:'smooth'});
+    if(i===0)renderMainStep(mainStep,true)};
+  $('nav').appendChild(b)});
+
+/* ---------- flujo animado (reutilizable) ---------- */
+function buildFlow(svg,d,opts={}){
+  // d: {res,cap,rl,div,dot,vol,teo,lim,margen,name}
+  svg.innerHTML='';
+  const W=760,H=400;
+  const c={legal:cssv('--legal'),div:cssv('--div'),vol:cssv('--vol'),res:cssv('--res'),ink:cssv('--ink'),mut:cssv('--mut'),line:cssv('--line'),tope:cssv('--tope')};
+  const defs=svgEl('defs',{},svg);
+  // origen
+  const src=svgEl('g',{},svg);
+  const sh=170;
+  const srcRect=svgEl('rect',{x:30,y:H/2-sh/2,width:110,height:sh,rx:12,fill:c.res,opacity:.9},src);
+  svgEl('text',{x:85,y:H/2-6,'text-anchor':'middle',fill:'#fff','font-size':13,'font-weight':600},src).textContent='(129)';
+  svgEl('text',{x:85,y:H/2+12,'text-anchor':'middle',fill:'#fff','font-size':12},src).textContent='Resultado';
+  const srcVal=svgEl('text',{x:85,y:H/2+32,'text-anchor':'middle',fill:'#fff','font-size':13,'font-weight':700},src);
+  srcVal.textContent=fmt(d.res);
+  // destinos
+  const total=d.res||1;
+  const dest=[
+    {k:'legal',n:'(112) Reserva legal',v:d.dot,col:c.legal,y:40},
+    {k:'div',n:'(526) Dividendo a pagar',v:d.div,col:c.div,y:H/2-45},
+    {k:'vol',n:'(113) Reserva voluntaria',v:d.vol,col:c.vol,y:H-135}
+  ];
+  const maxH=110,boxX=560,boxW=170;
+  const g={};
+  dest.forEach(o=>{
+    const grp=svgEl('g',{},svg);
+    const rect=svgEl('rect',{x:boxX,y:o.y,width:boxW,height:maxH,rx:12,fill:'none',stroke:o.col,'stroke-width':1.5,'stroke-dasharray':'4 4',opacity:.6},grp);
+    const fill=svgEl('rect',{x:boxX,y:o.y+maxH,width:boxW,height:0,rx:12,fill:o.col,opacity:.9},grp);
+    svgEl('text',{x:boxX+boxW/2,y:o.y-8,'text-anchor':'middle',fill:c.ink,'font-size':12.5,'font-weight':600},grp).textContent=o.n;
+    const val=svgEl('text',{x:boxX+boxW/2,y:o.y+maxH/2+5,'text-anchor':'middle',fill:'#fff','font-size':15,'font-weight':700},grp);
+    val.textContent='0 €';
+    const pct=svgEl('text',{x:boxX+boxW/2,y:o.y+maxH/2+24,'text-anchor':'middle',fill:'#fff','font-size':12,opacity:.9},grp);
+    g[o.k]={o,fill,val,pct,grp};
+  });
+  // tubos
+  const pipes={};
+  dest.forEach(o=>{
+    const y1=H/2, y2=o.y+maxH/2;
+    const path=svgEl('path',{d:`M140 ${y1} C 300 ${y1}, 380 ${y2}, ${boxX} ${y2}`,fill:'none',stroke:o.col,'stroke-width':2,opacity:.25},svg);
+    const flow=svgEl('path',{d:path.getAttribute('d'),fill:'none',stroke:o.col,'stroke-width':6,'stroke-linecap':'round',opacity:0,'stroke-dasharray':'2 14'},svg);
+    pipes[o.k]={path,flow};
+  });
+  // tope marker (si aplica)
+  const tp=svgEl('g',{opacity:0},svg);
+  const tpTxt=svgEl('text',{x:350,y:30,'text-anchor':'middle',fill:c.tope,'font-size':13,'font-weight':700},tp);
+  tpTxt.textContent='';
+  // cuadre
+  const cuad=svgEl('text',{x:W/2,y:H-10,'text-anchor':'middle',fill:c.mut,'font-size':13},svg);
+  return {svg,g,pipes,tp,tpTxt,cuad,srcVal,maxH,total,c};
+}
+function setDest(f,k,frac,val,total){
+  const o=f.g[k];const h=f.maxH*Math.max(0,Math.min(1,frac));
+  o.fill.setAttribute('y',o.o.y+f.maxH-h);o.fill.setAttribute('height',h);
+  o.val.textContent=fmt(val);
+  o.pct.textContent=total>0?(val/total*100).toFixed(1).replace('.',',')+' %':'';
+}
+function pulse(f,k,on){const p=f.pipes[k].flow;p.setAttribute('opacity',on?.9:0);
+  if(on){p.animate([{strokeDashoffset:0},{strokeDashoffset:-32}],{duration:900,iterations:Infinity})}
+  else p.getAnimations().forEach(a=>a.cancel())}
+
+/* ---------- PRINCIPAL: paso a paso ---------- */
+const P={cap:400000,rl:72000,res:250000,div:120000};
+const PD={...P,...calc(P.cap,P.rl,P.res,P.div)};
+let flowM, mainStep=0, mainTimer=null;
+const mainTexts=[
+  'Punto de partida: el ejercicio cierra con 250.000 € de beneficio en la cuenta (129). Falta decidir su destino.',
+  'Paso 1. Dotación teórica a reserva legal: 250.000 × 10 % = 25.000 €. Es lo que «tocaría» si no existiera tope.',
+  'Paso 2. Comprobamos el tope: 20 % de 400.000 = 80.000 €. Ya hay 72.000 € → solo caben 8.000 € más.',
+  'Paso 3. La dotación efectiva es el MENOR de los dos: mín(25.000; 8.000) = 8.000 €. Van a (112) Reserva legal.',
+  'Paso 4. La junta acuerda 120.000 € de dividendo, que quedan pendientes de pago en (526).',
+  'Paso 5. Lo que sobra cierra el reparto: 250.000 − 8.000 − 120.000 = 122.000 € a (113) Reservas voluntarias.',
+  'Cuadre: 8.000 + 120.000 + 122.000 = 250.000 € ✓. El asiento se cierra sin que sobre ni falte un euro.'
+];
+$('dotsMain').innerHTML=mainTexts.map(()=>'<span class="dot"></span>').join('');
+function renderMainStep(n,instant){
+  mainStep=n;
+  flowM=buildFlow($('flowMain'),{...PD,name:'Sarriá'});
+  const f=flowM,d=PD;
+  document.querySelectorAll('#dotsMain .dot').forEach((x,i)=>x.classList.toggle('on',i===n));
+  $('sayMain').textContent=mainTexts[n];
+  const T=instant?1:600;
+  const done={legal:n>=3,div:n>=4,vol:n>=5};
+  ['legal','div','vol'].forEach(k=>{
+    const v=k==='legal'?d.dot:k==='div'?d.div:d.vol;
+    if(done[k]){ if(instant)setDest(f,k,v/d.res,v,d.res); else tween(0,1,700,p=>setDest(f,k,(v/d.res)*p,v*p,d.res)); pulse(f,k,!instant&&(n===3&&k==='legal'||n===4&&k==='div'||n===5&&k==='vol')); }
+    else setDest(f,k,0,0,d.res);
+  });
+  if(n===1){ f.tp.setAttribute('opacity',1);f.tpTxt.textContent='Teórico: 25.000 €';f.tpTxt.setAttribute('fill',f.c.legal);
+    tween(0,1,700,p=>setDest(f,'legal',(d.teo/d.res)*p,d.teo*p,d.res)); f.g.legal.fill.setAttribute('opacity',.45); }
+  if(n===2){ f.tp.setAttribute('opacity',1);f.tpTxt.textContent='Tope 80.000 € − actual 72.000 € = margen 8.000 €';
+    setDest(f,'legal',d.teo/d.res,d.teo,d.res);f.g.legal.fill.setAttribute('opacity',.35);
+    tween(1,d.margen/d.teo,900,p=>setDest(f,'legal',(d.teo*p)/d.res,d.teo*p,d.res)); }
+  if(n===3){ f.tp.setAttribute('opacity',1);f.tpTxt.textContent='Efectiva = mín(25.000; 8.000) = 8.000 €'; }
+  if(n===6){ f.cuad.textContent='8.000 + 120.000 + 122.000 = 250.000 €  ✓'; f.cuad.setAttribute('fill',cssv('--vol')); f.cuad.setAttribute('font-weight',700);
+    f.tp.setAttribute('opacity',1);f.tpTxt.textContent='Asiento cuadrado'; f.tpTxt.setAttribute('fill',cssv('--vol')); }
+}
+function stopMain(){clearInterval(mainTimer);mainTimer=null;$('playMain').textContent='▶ Reproducir'}
+$('playMain').onclick=()=>{ if(mainTimer){stopMain();return}
+  if(mainStep>=mainTexts.length-1)mainStep=-1;
+  $('playMain').textContent='⏸ Pausa';
+  const go=()=>{ if(mainStep>=mainTexts.length-1){stopMain();return} renderMainStep(mainStep+1) };
+  go(); mainTimer=setInterval(go,2600)};
+$('nextMain').onclick=()=>{stopMain();renderMainStep(Math.min(mainTexts.length-1,mainStep+1))};
+$('prevMain').onclick=()=>{stopMain();renderMainStep(Math.max(0,mainStep-1),true)};
+
+/* ---------- SIMULADOR (barra apilada animada) ---------- */
+const S={cap:400000,rl:72000,res:250000,div:120000};
+let simCur={dot:0,div:0,vol:0}, simRAF=null;
+function drawSim(cur,d){
+  const svg=$('simSvg');svg.innerHTML='';
+  const c={legal:cssv('--legal'),div:cssv('--div'),vol:cssv('--vol'),ink:cssv('--ink'),mut:cssv('--mut'),line:cssv('--line'),tope:cssv('--tope')};
+  const x0=30,w=700,y=110,h=70;
+  svgEl('rect',{x:x0,y,width:w,height:h,rx:14,fill:'none',stroke:c.line,'stroke-width':2},svg);
+  const res=S.res;
+  const neg=d.vol<0;
+  let x=x0;
+  const segs=[['legal',cur.dot],['div',cur.div],['vol',Math.max(0,cur.vol)]];
+  segs.forEach(([k,v])=>{const ww=Math.max(0,v/res*w);
+    if(ww>0){svgEl('rect',{x,y,width:ww,height:h,rx:k==='legal'?14:0,fill:c[k]},svg);
+      if(ww>60)svgEl('text',{x:x+ww/2,y:y+h/2+5,'text-anchor':'middle',fill:'#fff','font-size':13,'font-weight':700},svg).textContent=fmt(v);
+      x+=ww}});
+  svgEl('text',{x:x0,y:y-16,fill:c.mut,'font-size':13},svg).textContent='Resultado del ejercicio: '+fmt(res);
+  // marcador teorico vs efectivo
+  const tx=x0+Math.min(1,d.teo/res)*w, ex=x0+Math.min(1,d.dot/res)*w;
+  svgEl('line',{x1:tx,x2:tx,y1:y+h+8,y2:y+h+40,stroke:c.mut,'stroke-dasharray':'3 3'},svg);
+  svgEl('text',{x:tx,y:y+h+56,'text-anchor':'middle',fill:c.mut,'font-size':12},svg).textContent='10 % teórico: '+fmt(d.teo);
+  svgEl('line',{x1:ex,x2:ex,y1:y+h+8,y2:y+h+28,stroke:c.legal,'stroke-width':2},svg);
+  svgEl('text',{x:Math.max(ex,x0+40),y:y+h+42,'text-anchor':'start',fill:c.legal,'font-size':12,'font-weight':700},svg).textContent=d.dot<d.teo?'← efectiva (topada)':'← efectiva';
+  if(neg){svgEl('text',{x:x0,y:y+h+92,fill:c.tope,'font-size':14,'font-weight':700},svg).textContent='⚠ Los dividendos superan lo repartible: la reserva voluntaria saldría negativa ('+fmt(d.vol)+').'}
+}
+function updateSim(anim=true){
+  const d=calc(S.cap,S.rl,S.res,S.div);
+  $('oCap').textContent=fmt(S.cap);$('oRl').textContent=fmt(S.rl);$('oRes').textContent=fmt(S.res);$('oDiv').textContent=fmt(S.div);
+  const from={...simCur},to={dot:d.dot,div:S.div,vol:d.vol};
+  const t0=performance.now();cancelAnimationFrame(simRAF);
+  const step=now=>{const p=Math.min(1,(now-t0)/500),e=ease(p);
+    simCur={dot:from.dot+(to.dot-from.dot)*e,div:from.div+(to.div-from.div)*e,vol:from.vol+(to.vol-from.vol)*e};
+    drawSim(simCur,d);if(p<1)simRAF=requestAnimationFrame(step)};
+  anim?simRAF=requestAnimationFrame(step):(simCur=to,drawSim(simCur,d));
+  $('simTbl').innerHTML=`<tr><th>Destino</th><th>Importe</th></tr>
+   <tr><td>Reserva legal (efectiva)</td><td>${fmt2(d.dot)}</td></tr>
+   <tr><td>Dividendos</td><td>${fmt2(S.div)}</td></tr>
+   <tr><td>Reserva voluntaria (resto)</td><td class="${d.vol<0?'bad':''}">${fmt2(d.vol)}</td></tr>
+   <tr><th>Total = resultado</th><th class="${d.vol<0?'bad':'ok'}">${fmt2(d.dot+S.div+d.vol)}</th></tr>`;
+}
+[['sCap','cap'],['sRl','rl'],['sRes','res'],['sDiv','div']].forEach(([id,k])=>$(id).addEventListener('input',e=>{S[k]=+e.target.value;updateSim()}));
+
+/* ---------- HUCHA ---------- */
+function drawJar(rl){
+  const svg=$('jar');svg.innerHTML='';
+  const c={legal:cssv('--legal'),ink:cssv('--ink'),mut:cssv('--mut'),line:cssv('--line'),tope:cssv('--tope'),vol:cssv('--vol')};
+  const cap=400000,lim=cap*.2;
+  $('oRl2').textContent=fmt(rl);
+  const x0=60,w=640,y=90,h=60;
+  svgEl('rect',{x:x0,y,width:w,height:h,rx:12,fill:'none',stroke:c.line,'stroke-width':2},svg);
+  const frac=Math.min(1,rl/lim);
+  svgEl('rect',{x:x0,y,width:w*frac,height:h,rx:12,fill:c.legal},svg);
+  // margen hueco
+  if(frac<1)svgEl('rect',{x:x0+w*frac,y:y+2,width:w*(1-frac)-2,height:h-4,rx:8,fill:c.legal,opacity:.15,'stroke':c.legal,'stroke-dasharray':'5 4'},svg);
+  svgEl('line',{x1:x0+w,x2:x0+w,y1:y-16,y2:y+h+16,stroke:c.tope,'stroke-width':3},svg);
+  svgEl('text',{x:x0+w,y:y-24,'text-anchor':'end',fill:c.tope,'font-size':13,'font-weight':700},svg).textContent='Tope 20 % del capital = '+fmt(lim);
+  svgEl('text',{x:x0,y:y+h+34,fill:c.ink,'font-size':13,'font-weight':600},svg).textContent='Reserva legal: '+fmt(rl)+' ('+(frac*100).toFixed(0)+' % del tope)';
+  const marg=Math.max(0,lim-rl);
+  const teo=25000, dot=Math.min(teo,marg);
+  $('jarSay').innerHTML=`Margen hasta el tope: <b>${fmt(marg)}</b>. Con un beneficio de 250.000 € la dotación teórica es 25.000 €, así que la <b>dotación efectiva es ${fmt(dot)}</b>${marg===0?' — la hucha ya está llena, no hay obligación de dotar.':marg<teo?' — recortada por el tope.':' — sin recorte.'}`;
+}
+$('sRl2').addEventListener('input',e=>drawJar(+e.target.value));
+
+/* ---------- EJERCICIOS N1..N4 ---------- */
+const EJ=[
+ {id:'p1',t:'Nivel 1 · Caso simple: dotación al 10 %, sin dividendos',
+  enun:'Capital 100.000 €, reserva legal actual 5.000 €, resultado 40.000 €, sin dividendos.',
+  cap:100000,rl:5000,res:40000,div:0,
+  txt:['Partimos de 40.000 € de beneficio en (129).','Dotación teórica: 40.000 × 10 % = 4.000 €. Margen hasta el tope: 20.000 − 5.000 = 15.000 €.','Como 4.000 < 15.000, el tope no molesta: dotación efectiva = 4.000 €.','No hay dividendo: 0 € a (526).','Todo lo demás cierra a reserva voluntaria: 40.000 − 4.000 = 36.000 €.','Cuadre: 4.000 + 0 + 36.000 = 40.000 € ✓'],
+  lectura:'Cuando la reserva legal está lejos del tope, la dotación efectiva coincide con el 10 % teórico.'},
+ {id:'p2',t:'Nivel 2 · Reserva legal ya al límite (dotación cero)',
+  enun:'Capital 200.000 €, reserva legal 40.000 € (ya el 20 %), resultado 60.000 €, dividendo 20.000 €.',
+  cap:200000,rl:40000,res:60000,div:20000,
+  txt:['Partimos de 60.000 € de beneficio en (129).','Dotación teórica: 60.000 × 10 % = 6.000 €. Margen: 40.000 − 40.000 = 0 €.','La hucha está llena: la dotación efectiva es 0 €. Ya no hay obligación de dotar.','La junta reparte 20.000 € de dividendo a (526).','El resto cierra a reserva voluntaria: 60.000 − 0 − 20.000 = 40.000 €.','Cuadre: 0 + 20.000 + 40.000 = 60.000 € ✓'],
+  lectura:'Alcanzado el 20 %, la obligación de dotar desaparece: todo lo que no se reparte queda libre en voluntarias.'},
+ {id:'p3',t:'Nivel 3 · Conservas Rioseco, S.A. (misma forma que el principal)',
+  enun:'Capital 600.000 €, reserva legal 105.000 €, resultado 300.000 €, dividendo 150.000 €.',
+  cap:600000,rl:105000,res:300000,div:150000,
+  txt:['Partimos de 300.000 € de beneficio en (129).','Dotación teórica: 300.000 × 10 % = 30.000 €. Margen: 120.000 − 105.000 = 15.000 €.','Mín(30.000; 15.000) = 15.000 €: la dotación queda topada.','La junta acuerda 150.000 € de dividendo.','Reserva voluntaria: 300.000 − 15.000 − 150.000 = 135.000 €.','Cuadre: 15.000 + 150.000 + 135.000 = 300.000 € ✓'],
+  lectura:'Misma estructura que Bodegas Sarriá con otros importes: el método no cambia.'},
+ {id:'p4',t:'Nivel 4 · ¿Es posible el dividendo que quiere la junta?',
+  enun:'Capital 150.000 €, reserva legal 10.000 €, resultado 45.000 €, dividendo deseado 40.000 €.',
+  cap:150000,rl:10000,res:45000,div:40000,
+  txt:['Partimos de 45.000 € de beneficio en (129).','Dotación teórica: 4.500 €. Margen: 30.000 − 10.000 = 20.000 € → sin tope.','Dotación efectiva a reserva legal: 4.500 €.','Máximo repartible como dividendo: 45.000 − 4.500 = 40.500 €. La junta quiere 40.000 € → sí es posible.','Sobran 500 € para reserva voluntaria.','Cuadre: 4.500 + 40.000 + 500 = 45.000 € ✓'],
+  lectura:'Antes de aprobar un dividendo, comprueba cuánto queda tras dotar la reserva legal obligatoria.'}
+];
+EJ.forEach(e=>{
+  const d={...e,...calc(e.cap,e.rl,e.res,e.div)};
+  e.d=d;e.step=0;e.timer=null;
+  const sec=$(e.id);
+  sec.innerHTML=`<div class="card"><h2>${e.t}</h2><p class="sub">${e.enun}</p>
+    <div class="stage"><svg id="${e.id}svg" viewBox="0 0 760 400"></svg></div>
+    <div class="steps" id="${e.id}dots">${e.txt.map(()=>'<span class="dot"></span>').join('')}</div>
+    <div class="say" id="${e.id}say"></div>
+    <div class="row"><button class="btn primary" id="${e.id}play">▶ Reproducir</button>
+    <button class="btn" id="${e.id}prev">← Paso</button><button class="btn" id="${e.id}next">Paso →</button></div>
+    <p class="sub" style="margin-top:12px"><b>Lectura:</b> ${e.lectura}</p></div>`;
+  const render=(n,instant)=>{
+    e.step=n;const f=buildFlow($(e.id+'svg'),d);
+    document.querySelectorAll('#'+e.id+'dots .dot').forEach((x,i)=>x.classList.toggle('on',i===n));
+    $(e.id+'say').textContent=e.txt[n];
+    const show={legal:n>=2,div:n>=3,vol:n>=4};
+    ['legal','div','vol'].forEach(k=>{const v=k==='legal'?d.dot:k==='div'?d.div:d.vol;
+      if(show[k]){instant?setDest(f,k,Math.max(0,v)/d.res,v,d.res):tween(0,1,650,p=>setDest(f,k,Math.max(0,v)/d.res*p,v*p,d.res));
+        if(!instant&&((n===2&&k==='legal')||(n===3&&k==='div')||(n===4&&k==='vol')))pulse(f,k,true)}
+      else setDest(f,k,0,0,d.res)});
+    if(n===1){f.tp.setAttribute('opacity',1);f.tpTxt.textContent='Teórico '+fmt(d.teo)+' · margen '+fmt(d.margen)}
+    if(n===2){f.tp.setAttribute('opacity',1);f.tpTxt.textContent=d.dot<d.teo?'Topada por el límite: '+fmt(d.dot):'Sin tope: '+fmt(d.dot)}
+    if(n===5){f.cuad.textContent=`${fmt(d.dot)} + ${fmt(d.div)} + ${fmt(d.vol)} = ${fmt(d.res)}  ✓`;f.cuad.setAttribute('fill',cssv('--vol'));f.cuad.setAttribute('font-weight',700)}
+  };
+  const stop=()=>{clearInterval(e.timer);e.timer=null;$(e.id+'play').textContent='▶ Reproducir'};
+  $(e.id+'play').onclick=()=>{if(e.timer){stop();return}if(e.step>=e.txt.length-1)e.step=-1;
+    $(e.id+'play').textContent='⏸ Pausa';
+    const go=()=>{if(e.step>=e.txt.length-1){stop();return}render(e.step+1)};go();e.timer=setInterval(go,2500)};
+  $(e.id+'next').onclick=()=>{stop();render(Math.min(e.txt.length-1,e.step+1))};
+  $(e.id+'prev').onclick=()=>{stop();render(Math.max(0,e.step-1),true)};
+  e.render=render;render(0,true);
+});
+
+/* ---------- init ---------- */
+renderMainStep(0,true);
+updateSim(false);
+drawJar(72000);
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{renderMainStep(mainStep,true);updateSim(false);drawJar(+$('sRl2').value);EJ.forEach(e=>e.render(e.step,true))});
+</script>
+</body>
+</html>
